@@ -36,8 +36,8 @@
                 <label class="block text-sm font-semibold text-slate-600 mb-2 text-center">
                     กรอกเลขรหัสคิวลงทะเบียน (4 หลัก)
                 </label>
-                <input type="text" id="reg_code" name="reg_code" placeholder="เช่น 0001" maxlength="4" required
-                    autocomplete="off"
+                <input type="text" id="reg_code" name="reg_code" placeholder="เช่น 0001" required autocomplete="off"
+                    inputmode="numeric" oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 4);"
                     class="w-full px-4 py-3 border border-slate-300 rounded-xl text-center text-3xl font-bold tracking-widest focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition duration-200 text-slate-800">
             </div>
             <button type="submit"
@@ -68,6 +68,13 @@
                 </svg>
                 ตรวจสอบข้อมูลผู้ลงทะเบียน
             </h3>
+
+            <div class="space-y-1">
+                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">รหัสประจำตัวนักศึกษา</p>
+                <p id="modal_student_id"
+                    class="text-base font-bold text-red-700 bg-red-50/50 p-3 rounded-xl border border-red-100 tracking-wider">
+                    -</p>
+            </div>
 
             <div class="space-y-1">
                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">ชื่อ-นามสกุล นักศึกษา</p>
@@ -118,6 +125,7 @@
 
                 if (data.success) {
                     document.getElementById('modal_reg_code').value = code;
+                    document.getElementById('modal_student_id').innerText = data.student_id;
                     document.getElementById('modal_student_name').innerText = data.student_name;
                     document.getElementById('modal_parent_name').value = data.parent_name;
                     modal.classList.replace('hidden', 'flex');
@@ -127,7 +135,7 @@
                         title: 'ไม่พบข้อมูล',
                         text: data.message,
                         confirmButtonText: 'ลองอีกครั้ง',
-                        confirmButtonColor: '#dc2626', // ปรับปุ่ม SweetAlert เป็นสีแดงเข้าธีม
+                        confirmButtonColor: '#dc2626',
                         customClass: { popup: 'rounded-2xl' }
                     });
                 }
@@ -136,7 +144,7 @@
                 Swal.fire({
                     icon: 'error',
                     title: 'เชื่อมต่อล้มเหลว',
-                    text: 'ไม่สามารถติดต่อกับ Server จำลองได้ กรุณาตรวจเช็กโปรแกรม XAMPP',
+                    text: 'ระบบขัดข้อง ไม่สามารถติดต่อ Server ได้',
                     confirmButtonColor: '#dc2626',
                     customClass: { popup: 'rounded-2xl' }
                 });
