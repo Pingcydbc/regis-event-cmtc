@@ -16,7 +16,7 @@ if ($action == 'download_template') {
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     echo "\xEF\xBB\xBF";
-    
+
     $output = fopen('php://output', 'w');
     fputcsv($output, ['registration_code', 'student_id', 'student_name', 'parent_name', 'status', 'level', 'room', 'department', 'registered_at']);
     fputcsv($output, ['1', '68409010001', 'นายสมชาย รักดี', '', 'ยังไม่ลงทะเบียน', 'ปวช.1', '1', 'เทคโนโลยีสารสนเทศ', '']);
@@ -33,16 +33,16 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $file_path = $_FILES['excel_file']['tmp_name'];
     $file_content = file_get_contents($file_path);
     $file_content = str_replace("\xEF\xBB\xBF", "", $file_content);
-    
+
     $file_handle = fopen('php://memory', 'r+');
     fwrite($file_handle, $file_content);
     rewind($file_handle);
     fgetcsv($file_handle);
-    
+
     $conn->query("TRUNCATE TABLE students_import");
 
     $stmt = $conn->prepare("INSERT INTO students_import (registration_code, student_id, student_name, parent_name, status, level, room, department, registered_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NULL)");
-    
+
     $success_count = 0;
     while (($row = fgetcsv($file_handle, 1000, ",")) !== FALSE) {
         $reg_code    = isset($row[0]) ? trim($row[0]) : '';
@@ -67,13 +67,73 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
 
     fclose($file_handle);
     $stmt->close();
-    
+
     if ($success_count > 0) {
         echo json_encode(["success" => true, "message" => "อิมพอร์ตข้อมูลรายชื่อนักเรียนชุดใหม่สำเร็จจำนวนทั้งหมด " . $success_count . " รายชื่อเรียบร้อยครับ"]);
     } else {
         echo json_encode(["success" => false, "message" => "ไม่พบข้อมูลรายชื่อภายในไฟล์ หรือประเภทไฟล์เซฟมาไม่ถูกต้อง"]);
     }
     $conn->close();
+    exit;
+}
+
+// 3. ดึงข้อมูลตัวเลือกสำหรับ Filter (แผนก และ ชั้นปี)
+if ($action == 'get_filters') {
+    $depts = [];
+    $levels = [];
+
+    $res_dept = $conn->query("SELECT DISTINCT department FROM students_import WHERE department != '' ORDER BY department ASC");
+    while($r = $res_dept->fetch_assoc()) $depts[] = $r['department'];
+
+    $res_level = $conn->query("SELECT DISTINCT level FROM students_import WHERE level != '' ORDER BY level ASC");
+    while($r = $res_level->fetch_assoc()) $levels[] = $r['level'];
+
+    echo json_encode([
+        "success" => true,
+        "departments" => $depts,
+        "levels" => $levels
+    ]);
+    exit;
+}
+
+// 4. ดึงสถิติการลงทะเบียนตาม Filter
+if ($action == 'get_stats') {
+    $dept = $_GET['department'] ?? '';
+    $level = $_GET['level'] ?? '';
+
+    $where = " WHERE 1=1 ";
+    $params = [];
+    $types = "";
+
+    if (!empty($dept)) {
+        $where .= " AND department = ? ";
+        $params[] = $dept;
+        $types .= "s";
+    }
+    if (!empty($level)) {
+        $where .= " AND level = ? ";
+        $params[] = $level;
+        $types .= "s";
+    }
+
+    $sql = "SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'ลงทะเบียนแล้ว' THEN 1 ELSE 0 END) as registered
+            FROM students_import $where";
+
+    $stmt = $conn->prepare($sql);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
+
+    echo json_encode([
+        "success" => true,
+        "total" => (int)$result['total'],
+        "registered" => (int)$result['registered'],
+        "not_registered" => (int)$result['total'] - (int)$result['registered']
+    ]);
     exit;
 }
 ?>

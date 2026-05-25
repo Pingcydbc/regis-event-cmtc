@@ -8,10 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>body { font-family: 'Sarabun', sans-serif; }</style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-100 via-stone-50 to-red-50 flex items-center justify-center min-h-screen p-4">
+<body class="bg-gradient-to-br from-slate-100 via-stone-50 to-red-50 flex flex-col items-center justify-center min-h-screen p-4 space-y-6">
 
     <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-red-600 transform transition-all hover:scale-[1.01] relative overflow-hidden">
         <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full -mr-8 -mt-8"></div>
@@ -41,6 +42,52 @@
 
         <div class="mt-6 text-center border-t border-slate-100 pt-4">
             <span class="text-[10px] text-slate-400 tracking-wider uppercase">Chiang Mai Technical College</span>
+        </div>
+    </div>
+
+    <!-- ส่วน Dashboard สำหรับ User (ปรับปรุงขนาด Dropdown) -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg w-full max-w-md border-b-4 border-slate-200 space-y-6">
+        <div class="space-y-4">
+            <h3 class="font-bold text-slate-700 flex items-center gap-2 text-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+                สถิติการลงทะเบียน
+            </h3>
+            
+            <!-- ปรับขนาด Dropdown ให้ใหญ่ขึ้นสำหรับมือถือ -->
+            <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-tight ml-1">แผนกวิชา</label>
+                    <select id="filter_dept" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500 transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10">
+                        <option value="">ทุกแผนก</option>
+                    </select>
+                </div>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-bold text-slate-400 uppercase tracking-tight ml-1">ชั้นปี</label>
+                    <select id="filter_level" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-3 text-sm font-medium outline-none focus:ring-2 focus:ring-red-100 focus:border-red-500 transition-all appearance-none bg-[url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%2364748b%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C/polyline%3E%3C/svg%3E')] bg-[length:1.25rem] bg-[right_0.5rem_center] bg-no-repeat pr-10">
+                        <option value="">ทุกชั้นปี</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex items-center gap-6 pt-2">
+            <div class="w-32 h-32 shrink-0">
+                <canvas id="userRegChart"></canvas>
+            </div>
+            <div class="flex-1 space-y-3">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">ลงทะเบียนแล้ว</span>
+                    <span id="stat_registered" class="font-bold text-green-600 text-base">0</span>
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-500">ทั้งหมด</span>
+                    <span id="stat_total" class="font-bold text-slate-800 text-base">0</span>
+                </div>
+                <div class="w-full bg-slate-100 rounded-full h-2 mt-2">
+                    <div id="stat_progress" class="bg-red-600 h-2 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-right text-sm font-bold text-red-600" id="stat_percent">0%</p>
+            </div>
         </div>
     </div>
 
@@ -90,6 +137,71 @@
         const modal = document.getElementById('modal');
         function closeModal() { modal.classList.replace('flex', 'hidden'); }
 
+        // --- Stats Dashboard for Index ---
+        let userChart = null;
+
+        async function initStats() {
+            try {
+                // Load Filters (Re-use admin actions since they are relevant)
+                const fResp = await fetch('process_admin.php?action=get_filters');
+                const fData = await fResp.json();
+                if (fData.success) {
+                    const dSel = document.getElementById('filter_dept');
+                    const lSel = document.getElementById('filter_level');
+                    fData.departments.forEach(d => { dSel.add(new Option(d, d)); });
+                    fData.levels.forEach(l => { lSel.add(new Option(l, l)); });
+                }
+            } catch(e) { console.error(e); }
+            updateStats();
+        }
+
+        async function updateStats() {
+            const dept = document.getElementById('filter_dept').value;
+            const level = document.getElementById('filter_level').value;
+            try {
+                const resp = await fetch(`process_admin.php?action=get_stats&department=${encodeURIComponent(dept)}&level=${encodeURIComponent(level)}`);
+                const data = await resp.json();
+                if (data.success) {
+                    document.getElementById('stat_registered').innerText = data.registered.toLocaleString();
+                    document.getElementById('stat_total').innerText = data.total.toLocaleString();
+                    const percent = data.total > 0 ? Math.round((data.registered / data.total) * 100) : 0;
+                    document.getElementById('stat_percent').innerText = percent + '%';
+                    document.getElementById('stat_progress').style.width = percent + '%';
+                    renderChart(data.registered, data.not_registered);
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        function renderChart(reg, not) {
+            const ctx = document.getElementById('userRegChart').getContext('2d');
+            if (userChart) {
+                userChart.data.datasets[0].data = [reg, not];
+                userChart.update();
+                return;
+            }
+            userChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [reg, not],
+                        backgroundColor: ['#16a34a', '#f1f5f9'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%',
+                    plugins: { tooltip: { enabled: false }, legend: { display: false } }
+                }
+            });
+        }
+
+        document.getElementById('filter_dept').addEventListener('change', updateStats);
+        document.getElementById('filter_level').addEventListener('change', updateStats);
+        initStats();
+
+        // --- Original Functions ---
         document.getElementById('checkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const code = document.getElementById('reg_code').value;
@@ -103,18 +215,28 @@
                     document.getElementById('modal_student_id').innerText = data.student_id;
                     document.getElementById('modal_student_name').innerText = data.student_name;
                     document.getElementById('modal_department').innerText = data.department;
-                    
-                    // 🌟 [จุดแก้ไขสำคัญ] ดึงข้อมูลสลับคืนให้ตรงตามช่องเป๊ะๆ ไม่สลับค่ากันอีกต่อไป
                     document.getElementById('modal_student_class').innerText = data.level + ' / ห้อง ' + data.room;
                     document.getElementById('modal_parent_name').value = data.parent_name;
-                    
+
                     modal.classList.replace('hidden', 'flex');
                 } else {
-                    Swal.fire({
-                        icon: 'error', title: 'ไม่พบข้อมูล', text: data.message,
-                        confirmButtonText: 'ลองอีกครั้ง', confirmButtonColor: '#dc2626',
-                        customClass: { popup: 'rounded-2xl' }
-                    });
+                    // ปรับแต่ง Pop-up กรณีลงทะเบียนซ้ำ
+                    if (data.message.includes('ลงทะเบียนเสร็จสิ้นไปแล้ว')) {
+                        Swal.fire({
+                            icon: 'info', 
+                            title: 'ลงทะเบียนแล้ว', 
+                            text: data.message,
+                            confirmButtonText: 'รับทราบ',
+                            confirmButtonColor: '#3085d6',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error', title: 'ไม่พบข้อมูล', text: data.message,
+                            confirmButtonText: 'ลองอีกครั้ง', confirmButtonColor: '#dc2626',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    }
                 }
             } catch (error) {
                 console.error(error);
@@ -141,13 +263,24 @@
                     }).then(() => {
                         closeModal();
                         document.getElementById('checkForm').reset();
+                        updateStats(); // Refresh stats after registration
                     });
                 } else {
-                    Swal.fire({
-                        icon: 'warning', title: 'ปฏิเสธการลงทะเบียน', text: data.message,
-                        confirmButtonColor: '#ea580c', confirmButtonText: 'ปิดหน้าต่าง',
-                        customClass: { popup: 'rounded-2xl' }
-                    });
+                    if (data.message.includes('ถูกลงทะเบียนไปก่อนหน้า')) {
+                         Swal.fire({
+                            icon: 'info',
+                            title: 'ลงทะเบียนแล้ว',
+                            text: data.message,
+                            confirmButtonColor: '#3085d6', confirmButtonText: 'ปิดหน้าต่าง',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'warning', title: 'ปฏิเสธการลงทะเบียน', text: data.message,
+                            confirmButtonColor: '#ea580c', confirmButtonText: 'ปิดหน้าต่าง',
+                            customClass: { popup: 'rounded-2xl' }
+                        });
+                    }
                 }
             } catch (error) {
                 Swal.fire({
