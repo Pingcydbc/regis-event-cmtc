@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -21,7 +28,10 @@
                     <p class="text-xs text-red-200">Chiang Mai Technical College</p>
                 </div>
             </div>
-            <a href="index.php" class="bg-red-800 hover:bg-red-900 text-xs px-3 py-2 rounded-xl transition font-medium border border-red-600">ไปหน้าแรกเว็บ</a>
+            <div class="flex gap-2">
+                <a href="index.php" class="bg-red-800 hover:bg-red-900 text-xs px-3 py-2 rounded-xl transition font-medium border border-red-600">ไปหน้าแรกเว็บ</a>
+                <a href="logout.php" class="bg-slate-800 hover:bg-slate-900 text-xs px-3 py-2 rounded-xl transition font-medium border border-slate-700">ออกจากระบบ</a>
+            </div>
         </div>
     </nav>
 
