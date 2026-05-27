@@ -13,28 +13,29 @@ $conn->query("SET time_zone = '+07:00'");
 
 $action = $_GET['action'] ?? '';
 
-// 1. ฟังก์ชันเช็กข้อมูลรหัสนักศึกษา
+// 1. ฟังก์ชันเช็กข้อมูลรหัสนักศึกษา หรือ เลขบัตรประชาชน
 if ($action == 'check') {
-    $student_id = trim($_GET['student_id'] ?? '');
+    $input_id = trim($_GET['id_card'] ?? $_GET['student_id'] ?? '');
 
-    if (empty($student_id)) {
-        echo json_encode(["success" => false, "message" => "กรุณากรอกรหัสนักศึกษา"]);
+    if (empty($input_id)) {
+        echo json_encode(["success" => false, "message" => "กรุณากรอกเลขประจำตัวประชาชน หรือ รหัสนักศึกษา"]);
         exit;
     }
 
-    // ดึงค่าตามชื่อคอลัมน์จากตารางจริง
-    $stmt = $conn->prepare("SELECT student_id, student_name, parent_name, status, level, room, department FROM students_import WHERE student_id = ?");
-    $stmt->bind_param("s", $student_id);
+    // ดึงค่าตามชื่อคอลัมน์จากตารางจริง โดยเช็กทั้ง student_id และ id_card
+    $stmt = $conn->prepare("SELECT student_id, id_card, student_name, parent_name, status, level, room, department FROM students_import WHERE id_card = ? OR student_id = ?");
+    $stmt->bind_param("ss", $input_id, $input_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($row = $result->fetch_assoc()) {
         if ($row['status'] == 'ลงทะเบียนแล้ว') {
-            echo json_encode(["success" => false, "message" => "รหัสนักศึกษานี้ได้ทำการลงทะเบียนเสร็จสิ้นไปแล้วครับ"]);
+            echo json_encode(["success" => false, "message" => "เลขบัตรนี้ได้ทำการลงทะเบียนเสร็จสิ้นไปแล้วครับ"]);
         } else {
             echo json_encode([
                 "success"      => true,
                 "student_id"   => $row['student_id'],
+                "id_card"      => $row['id_card'],
                 "student_name" => $row['student_name'],
                 "department"   => !empty($row['department']) ? $row['department'] : "ไม่ระบุแผนก",
                 "level"        => !empty($row['level']) ? $row['level'] : "ไม่ระบุชั้นปี",
@@ -43,7 +44,7 @@ if ($action == 'check') {
             ]);
         }
     } else {
-        echo json_encode(["success" => false, "message" => "ไม่พบรหัสนักศึกษา " . $student_id . " ในระบบ"]);
+        echo json_encode(["success" => false, "message" => "ไม่พบข้อมูล " . $input_id . " ในระบบ"]);
     }
     $stmt->close();
     exit;
@@ -51,11 +52,11 @@ if ($action == 'check') {
 
 // 2. ฟังก์ชันอัปเดตบันทึกข้อมูลการลงทะเบียน
 if ($action == 'register' && $_SERVER['REQUEST_METHOD'] == 'POST') {
-    $student_id = trim($_POST['modal_student_id_val'] ?? '');
+    $input_id = trim($_POST['modal_id_card_val'] ?? $_POST['modal_student_id_val'] ?? '');
     $parent_name = trim($_POST['modal_parent_name'] ?? '');
 
-    if (empty($student_id)) {
-        echo json_encode(["success" => false, "message" => "ไม่พบข้อมูลรหัสนักศึกษา"]);
+    if (empty($input_id)) {
+        echo json_encode(["success" => false, "message" => "ไม่พบข้อมูลประจำตัว"]);
         exit;
     }
 
@@ -64,8 +65,9 @@ if ($action == 'register' && $_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    $stmt = $conn->prepare("UPDATE students_import SET parent_name = ?, status = 'ลงทะเบียนแล้ว', registered_at = NOW() WHERE student_id = ? AND status = 'ยังไม่ลงทะเบียน'");
-    $stmt->bind_param("ss", $parent_name, $student_id);
+    // อัปเดตโดยเช็กทั้ง student_id และ id_card
+    $stmt = $conn->prepare("UPDATE students_import SET parent_name = ?, status = 'ลงทะเบียนแล้ว', registered_at = NOW() WHERE (student_id = ? OR id_card = ?) AND status = 'ยังไม่ลงทะเบียน'");
+    $stmt->bind_param("sss", $parent_name, $input_id, $input_id);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {

@@ -29,15 +29,16 @@
 
         <form id="checkForm" class="space-y-6 relative z-10">
             <div class="space-y-3">
-                <label class="block text-sm font-bold text-slate-700 text-center uppercase tracking-wide">กรอกรหัสนักศึกษาเพื่อลงทะเบียน</label>
-                <input type="text" id="student_id0" name="student_id0" placeholder="69319010001" required
+                <label class="block text-sm font-bold text-slate-700 text-center uppercase tracking-wide">กรอกเลขประจำตัวประชาชน 13 หลัก</label>
+                <input type="text" id="id_card" name="id_card" placeholder="1509900001001" required
                     autocomplete="off" inputmode="numeric"
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 11);"
-                    class="w-full px-5 py-4 border-2 border-slate-200 rounded-2xl text-center text-3xl font-black tracking-[0.2em] focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-300 placeholder:tracking-normal">
+                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 13);"
+                    class="w-full px-5 py-4 border-2 border-slate-200 rounded-2xl text-center text-2xl font-black tracking-[0.1em] focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-300 placeholder:tracking-normal">
             </div>
+
             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-red-200 text-lg flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                ยืนยันการลงทะเบียน
+                ยืนยันข้อมูล
             </button>
         </form>
 
@@ -46,6 +47,7 @@
         </div>
     </div>
 
+    <!-- Modal Moved Outside Main Container -->
     <div id="modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-sm z-50">
         <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-5 transform transition-all duration-300 border-t-4 border-red-600">
             <h3 class="text-lg font-bold text-slate-800 border-b pb-2 text-center text-red-600 flex items-center justify-center gap-2">
@@ -55,8 +57,8 @@
 
             <div class="space-y-2.5 text-sm border-b pb-4 border-slate-100">
                 <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">รหัสนักศึกษา:</span>
-                    <span id="modal_student_id" class="font-bold text-slate-800 tracking-wider">-</span>
+                    <span class="text-slate-400 font-medium w-32 shrink-0">เลขบัตรประชาชน:</span>
+                    <span id="modal_id_card" class="font-bold text-slate-800 tracking-wider">-</span>
                 </div>
                 <div class="flex items-start">
                     <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อ-นามสกุล นักศึกษา:</span>
@@ -73,7 +75,7 @@
             </div>
 
             <form id="registerForm" class="space-y-4">
-                <input type="hidden" id="modal_student_id_val" name="modal_student_id_val">
+                <input type="hidden" id="modal_id_card_val" name="modal_id_card_val">
                 <div>
                     <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ชื่อ-นามสกุล ผู้ปกครอง (ตรวจสอบ/แก้ไขได้)</label>
                     <input type="text" id="modal_parent_name" name="modal_parent_name" required autocomplete="off"
@@ -94,15 +96,15 @@
 
         document.getElementById('checkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const student_id = document.getElementById('student_id0').value;
+            const id_card = document.getElementById('id_card').value;
 
             try {
-                const response = await fetch('process.php?action=check&student_id=' + student_id);
+                const response = await fetch('process.php?action=check&id_card=' + id_card);
                 const data = await response.json();
 
                 if (data.success) {
-                    document.getElementById('modal_student_id_val').value = student_id;
-                    document.getElementById('modal_student_id').innerText = data.student_id;
+                    document.getElementById('modal_id_card_val').value = id_card;
+                    document.getElementById('modal_id_card').innerText = data.id_card;
                     document.getElementById('modal_student_name').innerText = data.student_name;
                     document.getElementById('modal_department').innerText = data.department;
                     document.getElementById('modal_student_class').innerText = data.level + ' / ห้อง ' + data.room;
