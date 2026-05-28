@@ -29,11 +29,11 @@
 
         <form id="checkForm" class="space-y-6 relative z-10">
             <div class="space-y-3">
-                <label class="block text-sm font-bold text-slate-700 text-center uppercase tracking-wide">กรอกเลขประจำตัวประชาชน 13 หลัก</label>
-                <input type="text" id="id_card" name="id_card" placeholder="1509900001001" required
-                    autocomplete="off" inputmode="numeric"
-                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 13);"
-                    class="w-full px-5 py-4 border-2 border-slate-200 rounded-2xl text-center text-2xl font-black tracking-[0.1em] focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-300 placeholder:tracking-normal">
+                <label class="block text-sm font-bold text-slate-700 text-center uppercase tracking-wide">กรอกเลขประจำตัวประชาชน หรือ รหัสประจำตัว</label>
+                <input type="text" id="id_card" name="id_card" placeholder="เช่น G635000054835 หรือ 15099..." required
+                    autocomplete="off"
+                    oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();"
+                    class="w-full px-5 py-4 border-2 border-slate-200 rounded-2xl text-center text-2xl font-black tracking-[0.1em] focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-300 placeholder:tracking-normal text-sm">
             </div>
 
             <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-red-200 text-lg flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95">
@@ -61,11 +61,11 @@
                     <span id="modal_id_card" class="font-bold text-slate-800 tracking-wider">-</span>
                 </div>
                 <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อ-นามสกุล นักศึกษา:</span>
+                    <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อ-นามสกุล ผู้เรียน:</span>
                     <span id="modal_student_name" class="font-bold text-slate-800">-</span>
                 </div>
                 <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">ระดับชั้น / ห้อง:</span>
+                    <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อกลุ่มเรียน:</span>
                     <span id="modal_student_class" class="font-bold text-slate-800">-</span>
                 </div>
                 <div class="flex items-start">
@@ -107,7 +107,7 @@
                     document.getElementById('modal_id_card').innerText = data.id_card;
                     document.getElementById('modal_student_name').innerText = data.student_name;
                     document.getElementById('modal_department').innerText = data.department;
-                    document.getElementById('modal_student_class').innerText = data.level + ' / ห้อง ' + data.room;
+                    document.getElementById('modal_student_class').innerText = data.group_name;
                     document.getElementById('modal_parent_name').value = data.parent_name;
 
                     modal.classList.replace('hidden', 'flex');

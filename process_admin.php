@@ -12,15 +12,16 @@ $conn->set_charset("utf8mb4");
 $action = $_GET['action'] ?? '';
 
 if ($action == 'download_template') {
-    $filename = "แบบฟอร์มข้อมูลนักเรียน_10คอลัมน์_" . date('Ymd') . ".csv";
+    $filename = "แบบฟอร์มข้อมูลนักเรียน_ใหม่_" . date('Ymd') . ".csv";
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
     echo "\xEF\xBB\xBF";
 
     $output = fopen('php://output', 'w');
-    // ลำดับ 10 คอลัมน์ที่ต้องการ: registration_code, student_id, id_card, student_name, level, department, room, parent_name, status, registered_at
-    fputcsv($output, ['registration_code', 'student_id', 'id_card', 'student_name', 'level', 'department', 'room', 'parent_name', 'status', 'registered_at']);
-    fputcsv($output, ['1', '68409010001', '1509901234567', 'นายสมชาย รักดี', 'ปวช.1', 'เทคโนโลยีสารสนเทศ', '1', '', 'ยังไม่ลงทะเบียน', '']);
+    fputcsv($output, ['(แถวที่ 1 ไม่ใช่ข้อมูล)']);
+    fputcsv($output, ['(แถวที่ 2 ไม่ใช่ข้อมูล)']);
+    fputcsv($output, ['ลำดับ', 'รหัสผู้เรียน', 'เลขบัตรประชาชน', 'ชื่อผู้เรียน', 'ชื่อผู้ปกครอง', 'ที่อยู่', 'โทรศัพท์ผู้ปกครอง', 'รหัสกลุ่มเรียน', 'ชื่อกลุ่มเรียน', 'สาขาวิชา']);
+    fputcsv($output, ['1', '68409010001', '1509901234567', 'นายสมชาย รักดี', 'นายสมบูรณ์ รักดี', '123 ม.1 ต.ช้างเผือก อ.เมือง จ.เชียงใหม่', '0812345678', '673090101', 'IT.67.1', 'เทคโนโลยีสารสนเทศ']);
     fclose($output);
     exit;
 }
@@ -38,34 +39,34 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $file_handle = fopen('php://memory', 'r+');
     fwrite($file_handle, $file_content);
     rewind($file_handle);
-    fgetcsv($file_handle); // ข้ามหัวตาราง
+    
+    // ข้าม 2 แถวแรกตามที่แจ้ง
+    fgetcsv($file_handle); 
+    fgetcsv($file_handle); 
 
     $conn->query("TRUNCATE TABLE students_import");
 
-    // เตรียม Statement ตามลำดับใหม่
-    $stmt = $conn->prepare("INSERT INTO students_import (registration_code, student_id, id_card, student_name, level, department, room, parent_name, status, registered_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)");
+    // เตรียม Statement ตามลำดับ A-J
+    $stmt = $conn->prepare("INSERT INTO students_import (registration_code, student_id, id_card, student_name, parent_name, address, parent_phone, group_id, group_name, department, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'ยังไม่ลงทะเบียน')");
 
     $success_count = 0;
-    while (($row = fgetcsv($file_handle, 1000, ",")) !== FALSE) {
-        // บังคับใช้ลำดับ 10 คอลัมน์ที่กำหนดเท่านั้น
+    while (($row = fgetcsv($file_handle, 2000, ",")) !== FALSE) {
+        if (count($row) < 4) continue;
+
         $reg_code     = isset($row[0]) ? trim($row[0]) : '';
         $student_id   = isset($row[1]) ? trim($row[1]) : '';
         $id_card      = isset($row[2]) ? trim($row[2]) : '';
         $student_name = isset($row[3]) ? trim($row[3]) : '';
-        $level        = isset($row[4]) ? trim($row[4]) : '';
-        $department   = isset($row[5]) ? trim($row[5]) : '';
-        $room         = isset($row[6]) ? trim($row[6]) : '';
-        $parent_name  = isset($row[7]) ? trim($row[7]) : '';
-        $status       = (isset($row[8]) && !empty(trim($row[8]))) ? trim($row[8]) : 'ยังไม่ลงทะเบียน';
+        $parent_name  = isset($row[4]) ? trim($row[4]) : '';
+        $address      = isset($row[5]) ? trim($row[5]) : '';
+        $parent_phone = isset($row[6]) ? trim($row[6]) : '';
+        $group_id     = isset($row[7]) ? trim($row[7]) : '';
+        $group_name   = isset($row[8]) ? trim($row[8]) : '';
+        $department   = isset($row[9]) ? trim($row[9]) : '';
 
-        if (empty($reg_code) && empty($student_name)) continue;
-        if (strpos($level, 'ป.ตรี') !== false) continue; // ข้าม ป.ตรี
+        if (empty($student_id) && empty($student_name)) continue;
 
-        if (is_numeric($reg_code)) {
-            $reg_code = sprintf("%04d", intval($reg_code));
-        }
-
-        $stmt->bind_param("sssssssss", $reg_code, $student_id, $id_card, $student_name, $level, $department, $room, $parent_name, $status);
+        $stmt->bind_param("ssssssssss", $reg_code, $student_id, $id_card, $student_name, $parent_name, $address, $parent_phone, $group_id, $group_name, $department);
         $stmt->execute();
         $success_count++;
     }
@@ -74,46 +75,51 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 
     if ($success_count > 0) {
-        echo json_encode(["success" => true, "message" => "อิมพอร์ตข้อมูลรายชื่อนักเรียนชุดใหม่สำเร็จจำนวนทั้งหมด " . $success_count . " รายชื่อเรียบร้อยครับ"]);
+        echo json_encode(["success" => true, "message" => "อิมพอร์ตข้อมูลใหม่สำเร็จจำนวน " . $success_count . " รายชื่อ"]);
     } else {
-        echo json_encode(["success" => false, "message" => "ไม่พบข้อมูลรายชื่อภายในไฟล์ หรือประเภทไฟล์เซฟมาไม่ถูกต้อง"]);
+        echo json_encode(["success" => false, "message" => "ไม่พบข้อมูลในไฟล์"]);
     }
     $conn->close();
     exit;
 }
 
-// 3. ดึงข้อมูลตัวเลือกสำหรับ Filter (แผนก และ ชั้นปี)
+// 3. ดึงข้อมูลตัวเลือกสำหรับ Filter
 if ($action == 'get_filters') {
     $depts = [];
-    $levels = [];
-    $rooms = [];
+    $groups = [];
+    $dept_filter = $_GET['department'] ?? '';
 
+    // ดึงแผนกทั้งหมด
     $res_dept = $conn->query("SELECT DISTINCT department FROM students_import WHERE department != '' ORDER BY department ASC");
     while($r = $res_dept->fetch_assoc()) $depts[] = $r['department'];
 
-    $res_level = $conn->query("SELECT DISTINCT level FROM students_import WHERE level != '' AND level NOT LIKE '%ป.ตรี%' ORDER BY level ASC");
-    while($r = $res_level->fetch_assoc()) $levels[] = $r['level'];
-
-    $res_room = $conn->query("SELECT DISTINCT room FROM students_import WHERE room != '' ORDER BY room ASC");
-    while($r = $res_room->fetch_assoc()) $rooms[] = $r['room'];
+    // ดึงกลุ่มเรียน (ถ้าเลือกแผนก ให้ดึงเฉพาะกลุ่มในแผนกนั้น)
+    if (!empty($dept_filter)) {
+        $stmt = $conn->prepare("SELECT DISTINCT group_name FROM students_import WHERE department = ? AND group_name != '' ORDER BY group_name ASC");
+        $stmt->bind_param("s", $dept_filter);
+        $stmt->execute();
+        $res_group = $stmt->get_result();
+    } else {
+        $res_group = $conn->query("SELECT DISTINCT group_name FROM students_import WHERE group_name != '' ORDER BY group_name ASC");
+    }
+    
+    while($r = $res_group->fetch_assoc()) $groups[] = $r['group_name'];
 
     echo json_encode([
         "success" => true,
         "departments" => $depts,
-        "levels" => $levels,
-        "rooms" => $rooms
+        "groups" => $groups
     ]);
+    if (isset($stmt)) $stmt->close();
     exit;
 }
 
 // 4. ดึงสถิติการลงทะเบียนตาม Filter
 if ($action == 'get_stats') {
     $dept = $_GET['department'] ?? '';
-    $level = $_GET['level'] ?? '';
-    $room = $_GET['room'] ?? '';
-    $level_group = $_GET['level_group'] ?? ''; // ปวช หรือ ปวส
+    $group = $_GET['group_name'] ?? '';
 
-    $where = " WHERE level NOT LIKE '%ป.ตรี%' ";
+    $where = " WHERE 1=1 ";
     $params = [];
     $types = "";
 
@@ -122,19 +128,9 @@ if ($action == 'get_stats') {
         $params[] = $dept;
         $types .= "s";
     }
-    if (!empty($level)) {
-        $where .= " AND level = ? ";
-        $params[] = $level;
-        $types .= "s";
-    }
-    if (!empty($room)) {
-        $where .= " AND room = ? ";
-        $params[] = $room;
-        $types .= "s";
-    }
-    if (!empty($level_group)) {
-        $where .= " AND level LIKE ? ";
-        $params[] = $level_group . "%";
+    if (!empty($group)) {
+        $where .= " AND group_name = ? ";
+        $params[] = $group;
         $types .= "s";
     }
 
@@ -148,27 +144,25 @@ if ($action == 'get_stats') {
         $stmt->bind_param($types, ...$params);
     }
     $stmt->execute();
-    $result = $stmt->get_result()->fetch_assoc();
-
-    // เพิ่มเติมสถิติแยก ปวช / ปวส
-    $sql_groups = "SELECT 
-                    SUM(CASE WHEN level LIKE 'ปวช%' THEN 1 ELSE 0 END) as pvc_total,
-                    SUM(CASE WHEN level LIKE 'ปวช%' AND status = 'ลงทะเบียนแล้ว' THEN 1 ELSE 0 END) as pvc_reg,
-                    SUM(CASE WHEN level LIKE 'ปวส%' THEN 1 ELSE 0 END) as pvs_total,
-                    SUM(CASE WHEN level LIKE 'ปวส%' AND status = 'ลงทะเบียนแล้ว' THEN 1 ELSE 0 END) as pvs_reg
-                  FROM students_import WHERE level NOT LIKE '%ป.ตรี%'";
-    $groups = $conn->query($sql_groups)->fetch_assoc();
+    $stats = $stmt->get_result()->fetch_assoc();
+    
+    // ดึงสถิติรวมทั้งหมด (ไม่ต้องมี filter) เพื่อแสดงข้อมูลพื้นฐาน
+    $sql_all = "SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN status = 'ลงทะเบียนแล้ว' THEN 1 ELSE 0 END) as registered
+                FROM students_import";
+    $stats_all = $conn->query($sql_all)->fetch_assoc();
 
     echo json_encode([
         "success" => true,
-        "total" => (int)$result['total'],
-        "registered" => (int)$result['registered'],
-        "not_registered" => (int)$result['total'] - (int)$result['registered'],
-        "groups" => [
-            "pvc" => ["total" => (int)$groups['pvc_total'], "reg" => (int)$groups['pvc_reg']],
-            "pvs" => ["total" => (int)$groups['pvs_total'], "reg" => (int)$groups['pvs_reg']]
-        ]
+        "total" => (int)$stats['total'],
+        "registered" => (int)$stats['registered'],
+        "percent" => $stats['total'] > 0 ? round(($stats['registered'] / $stats['total']) * 100, 2) . '%' : '0%',
+        "all_total" => (int)$stats_all['total'],
+        "all_reg" => (int)$stats_all['registered']
     ]);
     exit;
 }
+
+$conn->close();
 ?>

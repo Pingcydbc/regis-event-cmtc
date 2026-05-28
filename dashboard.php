@@ -37,7 +37,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
     <div class="max-w-4xl mx-auto px-4 py-10 space-y-8">
 
-        <!-- 0. Dashboard สรุปข้อมูล -->
+        <!-- Dashboard สรุปข้อมูล -->
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-6">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
@@ -45,19 +45,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                     <p class="text-sm text-slate-500">แสดงสถิติจำนวนผู้ลงทะเบียนเทียบกับทั้งหมด</p>
                 </div>
                 <div class="flex flex-wrap gap-2 w-full md:w-auto">
-                    <select id="filter_group" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none min-w-[100px]">
-                        <option value="">ทุกระดับ</option>
-                        <option value="ปวช">ปวช.</option>
-                        <option value="ปวส">ปวส.</option>
-                    </select>
-                    <select id="filter_dept" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none min-w-[150px]">
+                    <select id="filter_dept" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none w-full md:w-[220px]">
                         <option value="">ทุกแผนกวิชา</option>
                     </select>
-                    <select id="filter_level" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none min-w-[120px]">
-                        <option value="">ทุกชั้นปี</option>
-                    </select>
-                    <select id="filter_room" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none min-w-[80px]">
-                        <option value="">ทุกห้อง</option>
+                    <select id="filter_group" class="bg-slate-50 border border-slate-300 text-slate-700 text-sm rounded-xl focus:ring-red-500 focus:border-red-500 block p-2.5 outline-none transition flex-1 md:flex-none w-full md:w-[220px]">
+                        <option value="">ทุกชื่อกลุ่มเรียน</option>
                     </select>
                 </div>
             </div>
@@ -74,18 +66,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
                             <span class="text-sm text-green-600 font-medium">คน</span>
                         </div>
                     </div>
-                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100">
-                        <p class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">ปวช. ทั้งหมด</p>
+                    <div class="bg-blue-50 p-4 rounded-2xl border border-blue-100 col-span-2">
+                        <p class="text-xs text-blue-600 font-bold uppercase tracking-wider mb-1">สถิติรวมทั้งวิทยาลัย</p>
                         <div class="flex flex-col">
-                            <span class="text-xl font-bold text-blue-700"><span id="pvc_reg">0</span> / <span id="pvc_total">0</span></span>
-                            <span class="text-[10px] text-blue-500">ลงทะเบียนแล้ว / ทั้งหมด</span>
-                        </div>
-                    </div>
-                    <div class="bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                        <p class="text-xs text-purple-600 font-bold uppercase tracking-wider mb-1">ปวส. ทั้งหมด</p>
-                        <div class="flex flex-col">
-                            <span class="text-xl font-bold text-purple-700"><span id="pvs_reg">0</span> / <span id="pvs_total">0</span></span>
-                            <span class="text-[10px] text-purple-500">ลงทะเบียนแล้ว / ทั้งหมด</span>
+                            <span class="text-xl font-bold text-blue-700"><span id="all_reg">0</span> / <span id="all_total">0</span></span>
+                            <span class="text-[10px] text-blue-500">ลงทะเบียนแล้ว / ทั้งหมด (ทุกแผนก)</span>
                         </div>
                     </div>
                     <div class="bg-slate-100 p-4 rounded-2xl border border-slate-200 col-span-2">
@@ -106,8 +91,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
 
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
-                <h2 class="text-lg font-bold text-slate-800 mb-1">1. ดาวน์โหลดไฟล์ฟอร์แมต Excel เปล่า</h2>
-                <p class="text-sm text-slate-500">ใช้สำหรับกรอกข้อมูลรายชื่อนักเรียน (10 คอลัมน์รวมเลขบัตรฯ) ก่อนนำเข้าสู่ระบบ</p>
+                <h2 class="text-lg font-bold text-slate-800 mb-1">1. ดาวน์โหลดไฟล์ฟอร์แมต CSV เปล่า</h2>
+                <p class="text-sm text-slate-500">ใช้สำหรับกรอกข้อมูลรายชื่อผู้เรียน (คอลัมน์ A-J) ก่อนนำเข้าสู่ระบบ</p>
             </div>
             <a href="process_admin.php?action=download_template" class="w-full md:w-auto bg-slate-800 hover:bg-slate-900 text-white font-medium px-5 py-3 rounded-xl transition duration-150 shadow-md flex items-center justify-center gap-2 text-sm shrink-0">
                 📥 ดาวน์โหลดเทมเพลต CSV
@@ -117,7 +102,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
             <div>
                 <h2 class="text-lg font-bold text-slate-800 mb-1">2. อิมพอร์ตข้อมูล (Import CSV เข้าฐานข้อมูล)</h2>
-                <p class="text-sm text-slate-500">เลือกไฟล์ CSV (10 คอลัมน์) เพื่ออัปเดตรายชื่อใหม่ทั้งหมด (ระบบจะข้าม ป.ตรี อัตโนมัติ)</p>
+                <p class="text-sm text-slate-500">เลือกไฟล์ CSV (คอลัมน์ A-J, เริ่มข้อมูลแถวที่ 3) เพื่ออัปเดตรายชื่อใหม่</p>
             </div>
             <form id="importForm" enctype="multipart/form-data" class="bg-slate-50 p-4 rounded-xl border border-dashed border-slate-300 flex flex-col sm:flex-row items-center gap-4">
                 <input type="file" id="excel_file" name="excel_file" accept=".csv" required class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100 cursor-pointer">
@@ -130,7 +115,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-bold text-slate-800 mb-1">3. ส่งออกรายงาน (Export ตามที่เลือกด้านบน)</h2>
+                    <h2 class="text-lg font-bold text-slate-800 mb-1">3. ส่งออกรายงาน (Export)</h2>
                     <p class="text-sm text-slate-500">ดาวน์โหลดรายงานสรุปการลงทะเบียนตามเงื่อนไขที่เลือกใน Dashboard</p>
                 </div>
                 <div class="flex gap-2 w-full md:w-auto">
@@ -147,192 +132,157 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     </div>
 
     <script>
-        // --- ส่วนจัดการ Dashboard & Chart ---
         let regChart = null;
-
-        let allLevels = []; // เก็บชั้นปีทั้งหมดที่โหลดมาจากหลังบ้าน
-
+        
         async function initDashboard() {
-            // โหลดตัวเลือก Filter
             try {
-                const resp = await fetch('process_admin.php?action=get_filters');
-                const data = await resp.json();
+                const res = await fetch('process_admin.php?action=get_filters');
+                const data = await res.json();
                 if (data.success) {
                     const deptSelect = document.getElementById('filter_dept');
-                    const roomSelect = document.getElementById('filter_room');
-                    
-                    allLevels = data.levels; // เก็บชั้นปีต้นฉบับไว้
-
                     data.departments.forEach(d => {
                         const opt = document.createElement('option');
-                        opt.value = opt.text = d;
-                        deptSelect.add(opt);
+                        opt.value = opt.textContent = d;
+                        deptSelect.appendChild(opt);
                     });
-                    
-                    data.rooms.forEach(r => {
-                        const opt = document.createElement('option');
-                        opt.value = opt.text = r;
-                        roomSelect.add(opt);
-                    });
-
-                    updateLevelDropdown(); // เริ่มต้นสร้างตัวเลือกชั้นปี
+                    updateGroupDropdown(data.groups);
                 }
             } catch (e) { console.error('Error loading filters', e); }
-
             updateStats();
         }
 
-        function updateLevelDropdown() {
-            const group = document.getElementById('filter_group').value;
-            const levelSelect = document.getElementById('filter_level');
-            
-            // ล้างข้อมูลเดิม (ยกเว้น "ทุกชั้นปี")
-            levelSelect.innerHTML = '<option value="">ทุกชั้นปี</option>';
-            
-            // กรองชั้นปีตามกลุ่มที่เลือก
-            const filtered = allLevels.filter(l => {
-                if (!group) return true; // ถ้าเลือก "ทุกระดับ" ให้โชว์หมด
-                return l.startsWith(group);
-            });
+        async function loadGroupsByDept() {
+            const dept = document.getElementById('filter_dept').value;
+            try {
+                const res = await fetch(`process_admin.php?action=get_filters&department=${encodeURIComponent(dept)}`);
+                const data = await res.json();
+                if (data.success) {
+                    updateGroupDropdown(data.groups);
+                }
+            } catch (e) { console.error('Error loading groups', e); }
+            updateStats();
+        }
 
-            filtered.forEach(l => {
+        function updateGroupDropdown(groups) {
+            const groupSelect = document.getElementById('filter_group');
+            const currentValue = groupSelect.value;
+            groupSelect.innerHTML = '<option value="">ทุกชื่อกลุ่มเรียน</option>';
+            groups.forEach(g => {
                 const opt = document.createElement('option');
-                opt.value = opt.text = l;
-                levelSelect.add(opt);
+                opt.value = opt.textContent = g;
+                if (g === currentValue) opt.selected = true;
+                groupSelect.appendChild(opt);
             });
         }
 
         async function updateStats() {
-            const group = document.getElementById('filter_group').value;
             const dept = document.getElementById('filter_dept').value;
-            const level = document.getElementById('filter_level').value;
-            const room = document.getElementById('filter_room').value;
-
+            const group = document.getElementById('filter_group').value;
             try {
-                const resp = await fetch(`process_admin.php?action=get_stats&level_group=${encodeURIComponent(group)}&department=${encodeURIComponent(dept)}&level=${encodeURIComponent(level)}&room=${encodeURIComponent(room)}`);
-                const data = await resp.json();
-
+                const res = await fetch(`process_admin.php?action=get_stats&department=${encodeURIComponent(dept)}&group_name=${encodeURIComponent(group)}`);
+                const data = await res.json();
                 if (data.success) {
-                    document.getElementById('stat_registered').innerText = data.registered.toLocaleString();
-                    document.getElementById('stat_total').innerText = data.total.toLocaleString() + ' คน';
-                    
-                    // ปวช / ปวส Stats
-                    document.getElementById('pvc_total').innerText = data.groups.pvc.total.toLocaleString();
-                    document.getElementById('pvc_reg').innerText = data.groups.pvc.reg.toLocaleString();
-                    document.getElementById('pvs_total').innerText = data.groups.pvs.total.toLocaleString();
-                    document.getElementById('pvs_reg').innerText = data.groups.pvs.reg.toLocaleString();
-
-                    const percent = data.total > 0 ? Math.round((data.registered / data.total) * 100) : 0;
-                    document.getElementById('stat_percent').innerText = percent + '%';
-
+                    document.getElementById('stat_total').innerText = data.total + ' คน';
+                    document.getElementById('stat_registered').innerText = data.registered;
+                    document.getElementById('stat_percent').innerText = data.percent;
+                    document.getElementById('all_reg').innerText = data.all_reg;
+                    document.getElementById('all_total').innerText = data.all_total;
                     renderChart(data.registered, data.total - data.registered);
                 }
             } catch (e) { console.error('Error updating stats', e); }
         }
 
-        function renderChart(registered, not_registered) {
+        function renderChart(reg, notReg) {
             const ctx = document.getElementById('regChart').getContext('2d');
-            
             if (regChart) {
-                regChart.data.datasets[0].data = [registered, not_registered];
+                regChart.data.datasets[0].data = [reg, notReg];
                 regChart.update();
                 return;
             }
-
             regChart = new Chart(ctx, {
-                type: 'pie',
+                type: 'doughnut',
                 data: {
                     labels: ['ลงทะเบียนแล้ว', 'ยังไม่ลงทะเบียน'],
                     datasets: [{
-                        data: [registered, not_registered],
+                        data: [reg, notReg],
                         backgroundColor: ['#16a34a', '#e2e8f0'],
-                        borderWidth: 2,
-                        borderColor: '#ffffff'
+                        borderWidth: 0
                     }]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom', labels: { font: { family: 'Sarabun', size: 12 } } },
-                        tooltip: { callbacks: { label: (context) => ` ${context.label}: ${context.raw} คน` } }
-                    }
+                    cutout: '75%',
+                    plugins: { legend: { display: false } }
                 }
             });
         }
 
-        function exportData(type) {
-            const group = document.getElementById('filter_group').value;
-            const dept = document.getElementById('filter_dept').value;
-            const level = document.getElementById('filter_level').value;
-            const room = document.getElementById('filter_room').value;
+        document.getElementById('filter_dept').addEventListener('change', loadGroupsByDept);
+        document.getElementById('filter_group').addEventListener('change', updateStats);
 
-            // ดึงภาพจาก Chart เป็น Base64
-            const chartImage = regChart.toBase64Image();
+        function exportData(type) {
+            const dept = document.getElementById('filter_dept').value;
+            const group = document.getElementById('filter_group').value;
+            const chartData = document.getElementById('regChart').toDataURL();
             
-            // ดึงค่าสถิติปัจจุบัน
             const stats = {
+                total: document.getElementById('stat_total').innerText.replace(' คน', ''),
                 registered: document.getElementById('stat_registered').innerText,
-                total: document.getElementById('stat_total').innerText,
-                percent: document.getElementById('stat_percent').innerText,
-                pvc_reg: document.getElementById('pvc_reg').innerText,
-                pvc_total: document.getElementById('pvc_total').innerText,
-                pvs_reg: document.getElementById('pvs_reg').innerText,
-                pvs_total: document.getElementById('pvs_total').innerText
+                percent: document.getElementById('stat_percent').innerText
             };
 
-            // สร้าง Form แบบชั่วคราวเพื่อส่ง POST (เพราะ Base64 มันยาวเกินกว่าจะส่งแบบ GET)
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `export_report.php?format=${type}&level_group=${encodeURIComponent(group)}&department=${encodeURIComponent(dept)}&level=${encodeURIComponent(level)}&room=${encodeURIComponent(room)}`;
+            // สำหรับ PDF ใช้ export_report.php สำหรับ Excel ใช้ export_excel.php (ถ้ามี) หรือประมวลผลตาม format
+            form.action = type === 'pdf' ? 'export_report.php' : 'export_report.php?format=excel';
             form.target = '_blank';
 
-            const inputChart = document.createElement('input');
-            inputChart.type = 'hidden';
-            inputChart.name = 'chart_image';
-            inputChart.value = chartImage;
-            form.appendChild(inputChart);
+            const fields = {
+                department: dept,
+                group_name: group,
+                chart_image: chartData,
+                stats: JSON.stringify(stats)
+            };
 
-            const inputStats = document.createElement('input');
-            inputStats.type = 'hidden';
-            inputStats.name = 'stats_json';
-            inputStats.value = JSON.stringify(stats);
-            form.appendChild(inputStats);
+            for (const key in fields) {
+                const input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = key;
+                input.value = fields[key];
+                form.appendChild(input);
+            }
 
             document.body.appendChild(form);
             form.submit();
             document.body.removeChild(form);
         }
 
-        document.getElementById('filter_group').addEventListener('change', () => {
-            updateLevelDropdown(); // อัปเดตรายการชั้นปีตามกลุ่ม
-            updateStats();        // อัปเดตตัวเลขสถิติ
-        });
-        document.getElementById('filter_dept').addEventListener('change', updateStats);
-        document.getElementById('filter_level').addEventListener('change', updateStats);
-        document.getElementById('filter_room').addEventListener('change', updateStats);
-
-        // --- ส่วนจัดการ Import ---
         document.getElementById('importForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-            Swal.fire({ title: 'กำลังนำเข้าข้อมูล...', text: 'ระบบกำลังบันทึกชุดข้อมูลใหม่ 10 คอลัมน์ครับ', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            Swal.fire({
+                title: 'กำลังนำเข้าข้อมูล...',
+                text: 'กรุณารอสักครู่ ระบบกำลังประมวลผลไฟล์ CSV',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
             const formData = new FormData(e.target);
             try {
-                const response = await fetch('process_admin.php?action=import_data', { method: 'POST', body: formData });
+                const response = await fetch('process_admin.php?action=import_data', {
+                    method: 'POST',
+                    body: formData
+                });
                 const data = await response.json();
                 if (data.success) {
-                    Swal.fire({ icon: 'success', title: 'นำเข้าข้อมูลสำเร็จ!', text: data.message, confirmButtonColor: '#16a34a', customClass: { popup: 'rounded-2xl' } });
-                    document.getElementById('importForm').reset();
-                    updateStats(); // อัปเดต Dashboard หลังอิมพอร์ต
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: data.message, confirmButtonColor: '#dc2626' })
+                    .then(() => { window.location.reload(); });
                 } else {
-                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: data.message, confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' } });
+                    Swal.fire({ icon: 'error', title: 'เกิดข้อผิดพลาด', text: data.message, confirmButtonColor: '#dc2626' });
                 }
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'เชื่อมต่อล้มเหลว', text: 'ไม่สามารถติดต่อไฟล์หลังบ้านได้', confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' } });
+                Swal.fire({ icon: 'error', title: 'การเชื่อมต่อขัดข้อง', text: 'ไม่สามารถติดต่อเซิร์ฟเวอร์ได้', confirmButtonColor: '#dc2626' });
             }
         });
 
-        // เริ่มต้นการทำงาน
         initDashboard();
     </script>
 </body>

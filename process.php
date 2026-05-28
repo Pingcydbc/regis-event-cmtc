@@ -23,7 +23,7 @@ if ($action == 'check') {
     }
 
     // ดึงค่าตามชื่อคอลัมน์จากตารางจริง โดยเช็กทั้ง student_id และ id_card
-    $stmt = $conn->prepare("SELECT student_id, id_card, student_name, parent_name, status, level, room, department FROM students_import WHERE id_card = ? OR student_id = ?");
+    $stmt = $conn->prepare("SELECT student_id, id_card, student_name, parent_name, status, group_name, department FROM students_import WHERE id_card = ? OR student_id = ?");
     $stmt->bind_param("ss", $input_id, $input_id);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -38,8 +38,7 @@ if ($action == 'check') {
                 "id_card"      => $row['id_card'],
                 "student_name" => $row['student_name'],
                 "department"   => !empty($row['department']) ? $row['department'] : "ไม่ระบุแผนก",
-                "level"        => !empty($row['level']) ? $row['level'] : "ไม่ระบุชั้นปี",
-                "room"         => !empty($row['room']) ? $row['room'] : "1",
+                "group_name"   => !empty($row['group_name']) ? $row['group_name'] : "ไม่ระบุกลุ่มเรียน",
                 "parent_name"  => $row['parent_name']
             ]);
         }
