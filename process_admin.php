@@ -84,7 +84,6 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
         send_json_response(false, "ไม่พบข้อมูลนักเรียนในไฟล์ที่มึงอิมพอร์ตเข้ามา");
     }
 }
-
 // 3. ดึงข้อมูลตัวเลือกสำหรับ Filter
 if ($action == 'get_filters') {
     $depts = [];
