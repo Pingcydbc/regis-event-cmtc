@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# 1. ปลายทาง /dashboard ให้ไปที่ dashboard.php
+RewriteRule ^dashboard$ dashboard.php [L]
+
+# 2. ปลายทางอื่นๆ ที่ไม่มีนามสกุล .php ให้ลองเติม .php (Optional)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^(.*)$ $1.php [L]

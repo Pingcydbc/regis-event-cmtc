@@ -19,5 +19,6 @@ CREATE TABLE `students_import` (
   PRIMARY KEY (`id`),
   INDEX (`id_card`),
   INDEX (`student_id`),
-  INDEX (`group_name`)
+  INDEX (`group_name`),
+  INDEX (`registration_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
