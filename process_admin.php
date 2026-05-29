@@ -67,6 +67,17 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
         $group_name   = isset($row[8]) ? trim($row[8]) : '';
         $department   = isset($row[9]) ? trim($row[9]) : '';
 
+        // 🌟 แก้ไขปัญหาเลขบัตร หรือ รหัส นศ. เป็นตัวเลขยกกำลัง (Scientific Notation เช่น 1.5E+12)
+        if (stripos($id_card, 'E+') !== false) {
+            $id_card = number_format((float)$id_card, 0, '', '');
+        }
+        if (stripos($student_id, 'E+') !== false) {
+            $student_id = number_format((float)$student_id, 0, '', '');
+        }
+        if (stripos($reg_code, 'E+') !== false) {
+            $reg_code = number_format((float)$reg_code, 0, '', '');
+        }
+
         // ถ้าไม่มีทั้งรหัสนักศึกษาและชื่อนักศึกษา ให้ข้ามแถวนั้นไป (ป้องกันแถวว่างท้ายไฟล์)
         if (empty($student_id) && empty($student_name)) continue;
 
@@ -79,9 +90,9 @@ if ($action == 'import_data' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->close();
 
     if ($success_count > 0) {
-        send_json_response(true, "อิมพอร์ตข้อมูลใหม่สำเร็จจำนวน " . $success_count . " รายชื่อ (ระบบคัดแถวหัวข้อออกให้เรียบร้อยแล้ว)");
+        send_json_response(true, "อิมพอร์ตข้อมูลใหม่สำเร็จจำนวน " . $success_count . " รายชื่อ");
     } else {
-        send_json_response(false, "ไม่พบข้อมูลนักเรียนในไฟล์ที่มึงอิมพอร์ตเข้ามา");
+        send_json_response(false, "ไม่พบข้อมูลในไฟล์ที่นำเข้า");
     }
 }
 // 3. ดึงข้อมูลตัวเลือกสำหรับ Filter

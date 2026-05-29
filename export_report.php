@@ -1,6 +1,8 @@
 <?php
 require_once 'config.php';
-if (!defined('SECURE_ACCESS')) { die('Direct access not permitted'); }
+if (!defined('SECURE_ACCESS')) {
+    die('Direct access not permitted');
+}
 
 $conn = get_db_connection();
 if (!$conn) {
@@ -100,10 +102,21 @@ if ($format == 'excel') {
 
             foreach ($rows as $row) {
                 $reg_time = (!empty($row['registered_at'])) ? date('d/m/Y H:i:s', strtotime($row['registered_at'])) : "-";
+                
+                // 🌟 แก้ไขปัญหาเลขบัตรประชาชน/รหัสผู้เรียน เป็นตัวเลขยกกำลังใน Excel
+                $id_card_val = $row['id_card'] ?? '';
+                if (stripos($id_card_val, 'E+') !== false) { $id_card_val = number_format((float)$id_card_val, 0, '', ''); }
+                
+                $student_id_val = $row['student_id'] ?? '';
+                if (stripos($student_id_val, 'E+') !== false) { $student_id_val = number_format((float)$student_id_val, 0, '', ''); }
+
+                $reg_code_val = $row['registration_code'] ?? '';
+                if (stripos($reg_code_val, 'E+') !== false) { $reg_code_val = number_format((float)$reg_code_val, 0, '', ''); }
+
                 echo '    <Row>';
-                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($row['registration_code']) . '</Data></Cell>';
-                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($row['student_id']) . '</Data></Cell>';
-                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($row['id_card'] ?? '') . '</Data></Cell>';
+                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($reg_code_val) . '</Data></Cell>';
+                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($student_id_val) . '</Data></Cell>';
+                echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($id_card_val) . '</Data></Cell>';
                 echo '<Cell><Data ss:Type="String">' . htmlspecialchars($row['student_name']) . '</Data></Cell>';
                 echo '<Cell><Data ss:Type="String">' . htmlspecialchars($row['parent_name'] ?? '') . '</Data></Cell>';
                 echo '<Cell ss:StyleID="CellText"><Data ss:Type="String">' . htmlspecialchars($row['parent_phone'] ?? '') . '</Data></Cell>';
@@ -136,12 +149,15 @@ if ($format == 'excel') {
                 font-family: 'Sarabun', sans-serif;
                 margin: 0;
                 padding: 0;
+                /* 🌟 บังคับให้พิมพ์สีพื้นหลัง (Background Graphics) */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
             }
 
             .auto-scale-cell {
                 white-space: normal !important;
                 word-wrap: break-word;
-                word-break: keep-all; 
+                word-break: keep-all;
                 line-height: 1.2;
             }
 
@@ -178,7 +194,8 @@ if ($format == 'excel') {
                     backdrop-filter: blur(4px);
                 }
 
-                .print-spacer-header, .print-spacer-footer {
+                .print-spacer-header,
+                .print-spacer-footer {
                     display: none;
                 }
             }
@@ -239,7 +256,8 @@ if ($format == 'excel') {
                 page-break-after: auto;
             }
 
-            .report-content-table td, .report-content-table th {
+            .report-content-table td,
+            .report-content-table th {
                 vertical-align: top;
                 padding: 6px 4px !important;
                 border: 1px solid #cbd5e1 !important;
@@ -251,6 +269,21 @@ if ($format == 'excel') {
 
             .report-content-table thead {
                 display: table-header-group;
+            }
+
+            /* 🌟 บังคับสีหัวตารางให้เป็นสีดำเข้มและตัวหนังสือขาวบริสุทธิ์ (สำหรับงานพิมพ์ระดับราชการ) */
+            .report-content-table thead tr {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+            }
+
+            .report-content-table thead th {
+                background-color: #000000 !important;
+                color: #ffffff !important;
+                border: 1px solid #ffffff !important; /* เส้นขอบขาวบางๆ ให้เห็นช่องชัดขึ้น */
+                font-weight: bold !important;
+                padding: 10px 4px !important;
+                text-align: center !important;
             }
         </style>
     </head>
@@ -268,28 +301,37 @@ if ($format == 'excel') {
             <table class="master-table">
                 <thead>
                     <tr>
-                        <td><div class="print-spacer-header"></div></td>
+                        <td>
+                            <div class="print-spacer-header"></div>
+                        </td>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>
-                            <div class="flex justify-between items-start mb-8">
+                            <!-- 🌟 ปรับ Layout ส่วนหัวให้จัดกึ่งกลางเฉพาะ Logo และหัวข้อ -->
+                            <div class="flex flex-col items-center mb-4 text-center">
+                                <img src="logo.png" class="h-24 w-auto opacity-90 mb-4">
                                 <div>
-                                    <h1 class="text-3xl font-bold text-slate-800 tracking-tight">รายงานสรุปข้อมูลการลงทะเบียน</h1>
+                                    <h1 class="text-3xl font-bold text-slate-800 tracking-tight">
+                                        รายงานสรุปข้อมูลการลงทะเบียน</h1>
                                     <p class="text-slate-500 text-sm mt-1">วิทยาลัยเทคนิคเชียงใหม่ | ข้อมูล ณ วันที่
                                         <?php echo date('d/m/Y H:i'); ?> น.</p>
-                                    <div class="mt-3 inline-block bg-slate-100 px-3 py-1 rounded-full">
-                                        <p class="text-[11px] font-bold text-slate-600 uppercase">
-                                            เงื่อนไข:
-                                            <?php echo ($department_filter ?: 'ทุกแผนก') . ' | กลุ่มเรียน: ' . ($group_filter ?: 'ทั้งหมด'); ?>
-                                        </p>
-                                    </div>
                                 </div>
-                                <img src="logo.png" class="h-16 w-auto opacity-90">
+                            </div>
+
+                            <!-- 🌟 ย้ายเงื่อนไขกลับมาด้านซ้ายบน (ก่อนเริ่มเนื้อหา/กราฟ) -->
+                            <div class="mb-4">
+                                <div class="inline-block bg-slate-800 px-4 py-1.5 rounded-xl shadow-sm">
+                                    <p class="text-[11px] font-bold text-white uppercase tracking-wide">
+                                        เงื่อนไข:
+                                        <?php echo ($department_filter ?: 'ทุกแผนก') . ' | กลุ่มเรียน: ' . ($group_filter ?: 'ทั้งหมด'); ?>
+                                    </p>
+                                </div>
                             </div>
 
                             <?php if ($chart_image || $stats): ?>
+
                                 <div class="grid grid-cols-5 gap-6 mb-8 bg-slate-50 p-6 rounded-2xl border border-slate-100">
                                     <div class="col-span-2 flex justify-center items-center border-r border-slate-200 pr-6">
                                         <?php if ($chart_image): ?>
@@ -297,26 +339,32 @@ if ($format == 'excel') {
                                         <?php endif; ?>
                                     </div>
                                     <div class="col-span-3 space-y-3 pl-2">
-                                        <h3 class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base flex items-center gap-2">
+                                        <h3
+                                            class="font-bold text-slate-800 border-b border-slate-200 pb-2 text-base flex items-center gap-2">
                                             <span class="w-2 h-2 bg-red-600 rounded-full"></span>
                                             สรุปสถิติภาพรวม
                                         </h3>
                                         <div class="grid grid-cols-2 gap-4 pt-1">
                                             <div>
                                                 <p class="text-[10px] text-slate-500 font-bold uppercase">ลงทะเบียนสำเร็จ</p>
-                                                <p class="text-xl font-bold text-green-600"><?php echo $stats['registered'] ?? '0'; ?> <span
-                                                        class="text-xs font-normal text-slate-400">คน</span></p>
+                                                <p class="text-xl font-bold text-green-600">
+                                                    <?php echo $stats['registered'] ?? '0'; ?> <span
+                                                        class="text-xs font-normal text-slate-400">คน</span>
+                                                </p>
                                             </div>
                                             <div>
                                                 <p class="text-[10px] text-slate-500 font-bold uppercase">ทั้งหมดที่เลือก</p>
-                                                <p class="text-xl font-bold text-slate-800"><?php echo $stats['total'] ?? '0'; ?> <span
-                                                        class="text-xs font-normal text-slate-400">คน</span></p>
+                                                <p class="text-xl font-bold text-slate-800">
+                                                    <?php echo $stats['total'] ?? '0'; ?> <span
+                                                        class="text-xs font-normal text-slate-400">คน</span>
+                                                </p>
                                             </div>
                                         </div>
                                         <div class="bg-white p-3 rounded-xl border border-slate-200 mt-2">
                                             <div class="flex justify-between items-center">
                                                 <span class="text-sm font-bold text-slate-700">คิดเป็นร้อยละ</span>
-                                                <span class="text-xl font-bold text-red-600"><?php echo $stats['percent'] ?? '0%'; ?></span>
+                                                <span
+                                                    class="text-xl font-bold text-red-600"><?php echo $stats['percent'] ?? '0%'; ?></span>
                                             </div>
                                         </div>
                                     </div>
@@ -325,29 +373,40 @@ if ($format == 'excel') {
 
                             <table class="report-content-table text-[9px]">
                                 <thead>
-                                    <tr class="bg-slate-800 text-white">
-                                        <th class="border border-slate-700 w-[35px]">คิว</th>
-                                        <th class="border border-slate-700 w-[65px]">รหัสผู้เรียน</th>
-                                        <th class="border border-slate-700 w-[85px]">เลขบัตรประชาชน</th>
-                                        <th class="border border-slate-700 w-[120px]">ชื่อ-นามสกุล</th>
-                                        <th class="border border-slate-700 w-[70px]">ชื่อกลุ่มเรียน</th>
-                                        <th class="border border-slate-700 w-[110px]">แผนกวิชา</th>
-                                        <th class="border border-slate-700 w-[120px]">ผู้ปกครอง</th>
-                                        <th class="border border-slate-700 w-[60px]">สถานะ</th>
+                                    <tr>
+                                        <th style="width: 35px;">คิว</th>
+                                        <th style="width: 65px;">รหัสผู้เรียน</th>
+                                        <th style="width: 85px;">เลขบัตรประชาชน</th>
+                                        <th style="width: 120px;">ชื่อ-นามสกุล</th>
+                                        <th style="width: 70px;">ชื่อกลุ่มเรียน</th>
+                                        <th style="width: 110px;">แผนกวิชา</th>
+                                        <th style="width: 120px;">ผู้ปกครอง</th>
+                                        <th style="width: 60px;">สถานะ</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <?php if (count($students_data) > 0): ?>
                                         <?php foreach ($students_data as $row): ?>
+                                            <?php 
+                                                // 🌟 ป้องกันตัวเลขยกกำลังในหน้า PDF
+                                                $sid = $row['student_id'] ?? '';
+                                                if (stripos($sid, 'E+') !== false) { $sid = number_format((float)$sid, 0, '', ''); }
+                                                
+                                                $icard = $row['id_card'] ?? '-';
+                                                if (stripos($icard, 'E+') !== false) { $icard = number_format((float)$icard, 0, '', ''); }
+                                                
+                                                $rcode = $row['registration_code'] ?? '';
+                                                if (stripos($rcode, 'E+') !== false) { $rcode = number_format((float)$rcode, 0, '', ''); }
+                                            ?>
                                             <tr class="even:bg-slate-50">
                                                 <td class="border border-slate-200 text-center font-mono auto-scale-cell">
-                                                    <?php echo htmlspecialchars($row['registration_code']); ?>
+                                                    <?php echo htmlspecialchars($rcode); ?>
                                                 </td>
                                                 <td class="border border-slate-200 text-center auto-scale-cell">
-                                                    <?php echo htmlspecialchars($row['student_id']); ?>
+                                                    <?php echo htmlspecialchars($sid); ?>
                                                 </td>
                                                 <td class="border border-slate-200 text-center text-slate-500 auto-scale-cell">
-                                                    <?php echo htmlspecialchars($row['id_card'] ?? '-'); ?>
+                                                    <?php echo htmlspecialchars($icard); ?>
                                                 </td>
                                                 <td class="border border-slate-200 font-medium px-2 auto-scale-cell">
                                                     <?php echo htmlspecialchars($row['student_name']); ?>
@@ -362,7 +421,8 @@ if ($format == 'excel') {
                                                     <?php echo htmlspecialchars($row['parent_name'] ?: '-'); ?>
                                                 </td>
                                                 <td class="border border-slate-200 text-center auto-scale-cell">
-                                                    <span class="<?php echo $row['status'] == 'ลงทะเบียนแล้ว' ? 'text-green-600 font-bold' : 'text-slate-400'; ?>">
+                                                    <span
+                                                        class="<?php echo $row['status'] == 'ลงทะเบียนแล้ว' ? 'text-green-600 font-bold' : 'text-slate-400'; ?>">
                                                         <?php echo htmlspecialchars($row['status']); ?>
                                                     </span>
                                                 </td>
@@ -370,14 +430,16 @@ if ($format == 'excel') {
                                         <?php endforeach; ?>
                                     <?php else: ?>
                                         <tr>
-                                            <td colspan="8" class="border border-slate-200 p-12 text-center text-slate-400 italic bg-slate-50">
+                                            <td colspan="8"
+                                                class="border border-slate-200 p-12 text-center text-slate-400 italic bg-slate-50">
                                                 ไม่พบข้อมูลตามเงื่อนไขที่เลือก</td>
                                         </tr>
                                     <?php endif; ?>
                                 </tbody>
                             </table>
 
-                            <div class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 italic">
+                            <div
+                                class="mt-8 pt-4 border-t border-slate-100 flex justify-between items-center text-[10px] text-slate-400 italic">
                                 <div>Chiang Mai Technical College Registration System</div>
                                 <div>ระบบสรุปรายงานอัตโนมัติ</div>
                             </div>
@@ -386,13 +448,16 @@ if ($format == 'excel') {
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td><div class="print-spacer-footer"></div></td>
+                        <td>
+                            <div class="print-spacer-footer"></div>
+                        </td>
                     </tr>
                 </tfoot>
             </table>
         </div>
 
     </body>
+
     </html>
     <?php
 }
