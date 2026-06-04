@@ -230,9 +230,32 @@ $show_login = isset($_GET['login']) || !empty($login_error);
         document.getElementById('checkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id_card = document.getElementById('id_card').value;
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'กำลังตรวจสอบ...';
+
             try {
-                const response = await fetch('process.php?action=check&id_card=' + id_card);
-                const data = await response.json();
+                const response = await fetch('process.php?action=check&t=' + Date.now() + '&id_card=' + id_card, { 
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    cache: 'no-store' 
+                });
+                const text = await response.text();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+
+                // ตรวจสอบกรณีติดระบบป้องกัน Bot ของ Hosting
+                if (text.includes('aes.js') || text.includes('__test=')) {
+                    throw new Error("ระบบเครือข่ายมีการบล็อก (Anti-Bot) กรุณารีเฟรชหน้าเว็บแล้วลองใหม่");
+                }
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error("Invalid Server Response");
+                }
+
                 if (data.success) {
                     document.getElementById('modal_id_card_val').value = id_card;
                     document.getElementById('modal_id_card').innerText = data.id_card;
@@ -245,23 +268,52 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                     Swal.fire({ icon: data.message.includes('แล้ว') ? 'info' : 'error', title: 'แจ้งเตือน', text: data.message, confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' } });
                 }
             } catch (error) {
-                Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'ระบบขัดข้อง', confirmButtonColor: '#dc2626' });
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'ระบบขัดข้อง: ' + error.message, confirmButtonColor: '#dc2626' });
             }
         });
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = 'กำลังบันทึก...';
+
             try {
-                const response = await fetch('process.php?action=register', { method: 'POST', body: formData });
-                const data = await response.json();
+                const response = await fetch('process.php?action=register&t=' + Date.now(), { 
+                    method: 'POST', 
+                    body: formData,
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                    cache: 'no-store'
+                });
+                const text = await response.text();
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+
+                if (text.includes('aes.js')) throw new Error("ติดระบบป้องกัน Bot ของ Hosting");
+
+                let data;
+                try {
+                    data = JSON.parse(text);
+                } catch (err) {
+                    throw new Error("Invalid Server Response");
+                }
+
                 if (data.success) {
-                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: data.message, confirmButtonColor: '#16a34a' }).then(() => { closeModal(); document.getElementById('checkForm').reset(); });
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: data.message, confirmButtonColor: '#16a34a' }).then(() => { 
+                        closeModal(); 
+                        document.getElementById('checkForm').reset(); 
+                    });
                 } else {
                     Swal.fire({ icon: 'warning', text: data.message, confirmButtonColor: '#ea580c' });
                 }
             } catch (error) {
-                Swal.fire({ icon: 'error', text: 'ระบบขัดข้อง', confirmButtonColor: '#dc2626' });
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+                Swal.fire({ icon: 'error', text: 'ระบบขัดข้อง: ' + error.message, confirmButtonColor: '#dc2626' });
             }
         });
 
@@ -337,8 +389,14 @@ $show_login = isset($_GET['login']) || !empty($login_error);
             if (messages.length === 0) { body.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs italic">เริ่มการสนทนากับเราได้ที่นี่...</div>'; return; }
             body.innerHTML = messages.map(msg => {
                 const isMe = msg.sender_type === 'user';
-                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'} p-3 shadow-sm relative"><p class="text-sm leading-relaxed">${msg.message}</p><span class="text-[9px] ${isMe ? 'text-blue-200' : 'text-slate-400'} block mt-1 text-right">${msg.time}</span></div></div>`;
+                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'} p-3 shadow-sm relative"><p class="text-sm leading-relaxed">${escapeHtml(msg.message)}</p><span class="text-[9px] ${isMe ? 'text-blue-200' : 'text-slate-400'} block mt-1 text-right">${msg.time}</span></div></div>`;
             }).join('');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
 
         function startPolling() { fetchMessages(); chatPollInterval = setInterval(fetchMessages, 7000); }
@@ -368,13 +426,14 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                 if (!data.success) { Swal.fire('ผิดพลาด', 'โหลดข้อมูลไม่สำเร็จ', 'error'); return; }
                 const deptOpts = data.departments.map(d => `<option value="${d}">${d}</option>`).join('');
                 Swal.fire({
-                    title: '<h3 class="text-xl font-bold"></h3>',
-                    html: `<div class="text-left space-y-4 p-2">
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">เลขประจำตัวนักศึกษา</label><input type="text" id="fix_student_id" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="รหัสนักศึกษา"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล นักศึกษา</label><input type="text" id="fix_student_name" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="ชื่อ-นามสกุล"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล ผู้ปกครอง</label><input type="text" id="fix_parent_name" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="ชื่อผู้ปกครอง"></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">แผนกวิชา</label><select id="fix_department" class="w-full px-4 py-3 border rounded-xl outline-none"><option value="">-- เลือกแผนก --</option>${deptOpts}</select></div>
-                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อกลุ่มเรียน</label><select id="fix_group_name" class="w-full px-4 py-3 border rounded-xl outline-none"><option value="">-- กรุณาเลือกแผนกก่อน --</option></select></div>
+                    title: '<h3 class="text-xl font-bold">แจ้งเพิ่มรายชื่อใหม่</h3>',
+                    html: `<div class="text-left space-y-4 p-2 custom-scrollbar overflow-y-auto max-h-[60vh]">
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">เลขประจำตัวประชาชน (สำคัญ)</label><input type="text" id="fix_id_card" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600" placeholder="เลขบัตรประชาชน 13 หลัก"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">เลขประจำตัวนักศึกษา</label><input type="text" id="fix_student_id" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600" placeholder="รหัสนักศึกษา"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล นักศึกษา</label><input type="text" id="fix_student_name" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600" placeholder="ชื่อ-นามสกุล"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล ผู้ปกครอง</label><input type="text" id="fix_parent_name" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600" placeholder="ชื่อผู้ปกครอง"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">แผนกวิชา</label><select id="fix_department" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600"><option value="">-- เลือกแผนก --</option>${deptOpts}</select></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อกลุ่มเรียน</label><select id="fix_group_name" class="w-full px-4 py-3 border rounded-xl outline-none focus:border-red-600"><option value="">-- กรุณาเลือกแผนกก่อน --</option></select></div>
                     </div>`,
                     showCancelButton: true, confirmButtonText: 'บันทึกข้อมูล', confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-3xl' },
                     didOpen: () => {
@@ -391,13 +450,14 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                         });
                     },
                     preConfirm: () => {
+                        const icard = Swal.getPopup().querySelector('#fix_id_card').value;
                         const sid = Swal.getPopup().querySelector('#fix_student_id').value;
                         const sname = Swal.getPopup().querySelector('#fix_student_name').value;
                         const pname = Swal.getPopup().querySelector('#fix_parent_name').value;
                         const dept = Swal.getPopup().querySelector('#fix_department').value;
                         const grp = Swal.getPopup().querySelector('#fix_group_name').value;
-                        if (!sid || !sname || !pname || !dept || !grp) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); }
-                        return { student_id: sid, student_name: sname, parent_name: pname, department: dept, group_name: grp };
+                        if (!icard || !sid || !sname || !pname || !dept || !grp) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); }
+                        return { id_card: icard, student_id: sid, student_name: sname, parent_name: pname, department: dept, group_name: grp };
                     }
                 }).then(r => { if (r.isConfirmed) saveFixStudent(r.value); });
             } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อเซิร์ฟเวอร์ไม่ได้', 'error'); }

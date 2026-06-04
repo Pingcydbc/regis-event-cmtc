@@ -368,6 +368,11 @@ if (!check_auth()) {
                 }
             } catch (e) { 
                 console.error("Fetch Error:", e);
+                if (text.includes('aes.js') || text.includes('__test=')) {
+                    // กรณีติด Anti-Bot ของ InfinityFree
+                    const timerDisp = document.getElementById('refresh_timer');
+                    if (timerDisp) timerDisp.innerHTML = '<span class="text-red-400">ติดระบบป้องกันบอท กรุณารีเฟรชหน้าเว็บ</span>';
+                }
             }
         }
 
@@ -382,23 +387,29 @@ if (!check_auth()) {
             const q = e.target.value.trim();
             if (q.length < 2) { document.getElementById('searchResults').classList.add('hidden'); return; }
             searchTimeout = setTimeout(async () => {
-                try {
-                    const res = await fetch(`process_admin.php?action=search_students&query=${encodeURIComponent(q)}`);
-                    const data = await res.json();
-                    const tbody = document.getElementById('searchResultsBody');
-                    tbody.innerHTML = '';
-                    if (data.success && data.list.length > 0) {
-                        data.list.forEach(item => {
-                            const badge = item.source === 'หลัก' 
-                                ? '<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-slate-200">Main</span>' 
-                                : '<span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-amber-100">Added</span>';
-                            tbody.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50/80 transition-colors group"><td class="px-6 py-4">${badge}</td><td class="px-6 py-4 font-mono text-xs text-slate-400 group-hover:text-slate-900 transition-colors">${item.student_id}</td><td class="px-6 py-4 font-black text-slate-800">${item.student_name}</td><td class="px-6 py-4 text-slate-400 font-bold text-[10px] group-hover:text-slate-600 transition-colors">${item.group_name}</td><td class="px-6 py-4 text-right"><span class="${item.status === 'ลงทะเบียนแล้ว' ? 'text-emerald-600' : 'text-slate-200'} font-black text-[10px] uppercase">${item.status}</span></td></tr>`);
-                        });
-                        document.getElementById('searchResults').classList.remove('hidden');
-                    } else { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-300 italic font-black uppercase tracking-widest text-[9px]">ไม่พบข้อมูลที่ค้นหา</td></tr>'; document.getElementById('searchResults').classList.remove('hidden'); }
-                } catch (e) { console.error(e); }
+            try {
+                const res = await fetch(`process_admin.php?action=search_students&query=${encodeURIComponent(q)}`);
+                const data = await res.json();
+                const tbody = document.getElementById('searchResultsBody');
+                tbody.innerHTML = '';
+                if (data.success && data.list.length > 0) {
+                    data.list.forEach(item => {
+                        const badge = item.source === 'หลัก' 
+                            ? '<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-slate-200">Main</span>' 
+                            : '<span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-amber-100">Added</span>';
+                        tbody.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50/80 transition-colors group"><td class="px-6 py-4">${badge}</td><td class="px-6 py-4 font-mono text-xs text-slate-400 group-hover:text-slate-900 transition-colors">${escapeHtml(item.student_id)}</td><td class="px-6 py-4 font-black text-slate-800">${escapeHtml(item.student_name)}</td><td class="px-6 py-4 text-slate-400 font-bold text-[10px] group-hover:text-slate-600 transition-colors">${escapeHtml(item.group_name)}</td><td class="px-6 py-4 text-right"><span class="${item.status === 'ลงทะเบียนแล้ว' ? 'text-emerald-600' : 'text-slate-200'} font-black text-[10px] uppercase">${escapeHtml(item.status)}</span></td></tr>`);
+                    });
+                    document.getElementById('searchResults').classList.remove('hidden');
+                } else { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-300 italic font-black uppercase tracking-widest text-[9px]">ไม่พบข้อมูลที่ค้นหา</td></tr>'; document.getElementById('searchResults').classList.remove('hidden'); }
+            } catch (e) { console.error(e); }
             }, 300);
-        });
+            });
+
+            function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text || '';
+            return div.innerHTML;
+            }
 
         function renderChart(reg, nreg) {
             const ctx = document.getElementById('regChart').getContext('2d');

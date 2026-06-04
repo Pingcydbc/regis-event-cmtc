@@ -54,37 +54,38 @@ if ($action == 'get_options') {
 if ($action == 'save' && $_SERVER['REQUEST_METHOD'] == 'POST') {
     ensure_fix_table_exists($conn);
 
+    $id_card = trim($_POST['id_card'] ?? '');
     $student_id = trim($_POST['student_id'] ?? '');
     $student_name = trim($_POST['student_name'] ?? '');
     $parent_name = trim($_POST['parent_name'] ?? '');
     $group_name = trim($_POST['group_name'] ?? '');
     $department = trim($_POST['department'] ?? '');
 
-    if (empty($student_id) || empty($student_name) || empty($group_name) || empty($department)) {
+    if (empty($id_card) || empty($student_id) || empty($student_name) || empty($group_name) || empty($department)) {
         send_json_response(false, "กรุณากรอกข้อมูลสำคัญให้ครบถ้วน");
     }
 
     // 1. ตรวจสอบว่ามีรหัสนักศึกษานี้ในตารางหลัก (students_import) หรือยัง
-    $check_main = $conn->prepare("SELECT id FROM students_import WHERE student_id = ?");
-    $check_main->bind_param("s", $student_id);
+    $check_main = $conn->prepare("SELECT id FROM students_import WHERE student_id = ? OR id_card = ?");
+    $check_main->bind_param("ss", $student_id, $id_card);
     $check_main->execute();
     if ($check_main->get_result()->num_rows > 0) {
-        send_json_response(false, "รหัสนักศึกษานี้มีอยู่ในระบบอยู่แล้ว กรุณากลับไปตรวจสอบที่หน้าแรก");
+        send_json_response(false, "ข้อมูลนักศึกษานี้มีอยู่ในระบบอยู่แล้ว กรุณากลับไปตรวจสอบที่หน้าแรก");
     }
     $check_main->close();
 
     // 2. ตรวจสอบว่ามีการแจ้งเพิ่มรหัสนักศึกษานี้ในตารางแจ้งเพิ่ม (fix_student) ไปแล้วหรือยัง
-    $check_fix = $conn->prepare("SELECT id FROM fix_student WHERE student_id = ?");
-    $check_fix->bind_param("s", $student_id);
+    $check_fix = $conn->prepare("SELECT id FROM fix_student WHERE student_id = ? OR id_card = ?");
+    $check_fix->bind_param("ss", $student_id, $id_card);
     $check_fix->execute();
     if ($check_fix->get_result()->num_rows > 0) {
-        send_json_response(false, "รหัสนักศึกษานี้ได้มีการแจ้งข้อมูลใหม่เข้ามาแล้วครับ ไม่ต้องกรอกซ้ำ");
+        send_json_response(false, "ข้อมูลนักศึกษานี้ได้มีการแจ้งข้อมูลใหม่เข้ามาแล้วครับ ไม่ต้องกรอกซ้ำ");
     }
     $check_fix->close();
 
     // 3. บันทึกข้อมูลหากไม่พบข้อมูลซ้ำ
-    $stmt = $conn->prepare("INSERT INTO fix_student (student_id, student_name, parent_name, group_name, department) VALUES (?, ?, ?, ?, ?)");
-    $stmt->bind_param("sssss", $student_id, $student_name, $parent_name, $group_name, $department);
+    $stmt = $conn->prepare("INSERT INTO fix_student (id_card, student_id, student_name, parent_name, group_name, department) VALUES (?, ?, ?, ?, ?, ?)");
+    $stmt->bind_param("ssssss", $id_card, $student_id, $student_name, $parent_name, $group_name, $department);
     
     if ($stmt->execute()) {
         send_json_response(true, "บันทึกข้อมูลเรียบร้อยแล้ว แอดมินจะตรวจสอบข้อมูลของคุณโดยเร็วที่สุด");

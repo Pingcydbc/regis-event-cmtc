@@ -43,25 +43,34 @@ if ($action == 'check') {
 
 // 2. ฟังก์ชันอัปเดตบันทึกข้อมูลการลงทะเบียน
 if ($action == 'register' && $_SERVER['REQUEST_METHOD'] == 'POST') {
-    $input_id = trim($_POST['modal_id_card_val'] ?? $_POST['modal_student_id_val'] ?? '');
+    $input_id = trim($_POST['modal_id_card_val'] ?? '');
     $parent_name = trim($_POST['modal_parent_name'] ?? '');
 
     if (empty($input_id)) {
-        send_json_response(false, "ไม่พบข้อมูลประจำตัว");
+        send_json_response(false, "ไม่พบข้อมูลประจำตัว (กรุณาลองตรวจสอบใหม่อีกครั้ง)");
     }
 
     if (empty($parent_name)) {
         send_json_response(false, "กรุณากรอกชื่อผู้ปกครอง");
     }
 
-    $stmt = $conn->prepare("UPDATE students_import SET parent_name = ?, status = 'ลงทะเบียนแล้ว', registered_at = NOW() WHERE (student_id = ? OR id_card = ?) AND status = 'ยังไม่ลงทะเบียน'");
-    $stmt->bind_param("sss", $parent_name, $input_id, $input_id);
-    $stmt->execute();
+    $stmt = $conn->prepare("UPDATE students_import SET parent_name = ?, status = 'ลงทะเบียนแล้ว', registered_at = NOW() WHERE (student_id = ? OR id_card = ?) AND status != 'ลงทะเบียนแล้ว'");
+    
+    if (!$stmt) {
+        send_json_response(false, "Database preparation failed: " . $conn->error);
+    }
 
-    if ($stmt->affected_rows > 0) {
-        send_json_response(true, "ผู้ปกครองของนักศึกษาทำรายการลงทะเบียนเสร็จเรียบร้อยแล้วครับ");
-    } else {
-        send_json_response(false, "ทำรายการไม่สำเร็จ อาจถูกลงทะเบียนไปก่อนหน้านี้แล้ว");
+    $stmt->bind_param("sss", $parent_name, $input_id, $input_id);
+    
+    try {
+        $stmt->execute();
+        if ($stmt->affected_rows > 0) {
+            send_json_response(true, "ผู้ปกครองทำรายการลงทะเบียนเสร็จเรียบร้อยแล้วครับ");
+        } else {
+            send_json_response(false, "ทำรายการไม่สำเร็จ หรืออาจถูกลงทะเบียนไปก่อนหน้านี้แล้ว");
+        }
+    } catch (Exception $e) {
+        send_json_response(false, "เกิดข้อผิดพลาดในการบันทึก: " . $e->getMessage());
     }
     $stmt->close();
 }

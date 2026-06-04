@@ -45,13 +45,27 @@ $students_data = [];
 while ($row = $result->fetch_assoc()) {
     $students_data[] = $row;
 }
-
 $stmt->close();
 
-// รับข้อมูลภาพ Chart และสถิติ
+// 🌟 [จุดแก้ไข] คำนวณสถิติเองจากฐานข้อมูล (ไม่เชื่อข้อมูลจาก POST)
+$sql_stats = "SELECT 
+                COUNT(*) as total,
+                SUM(CASE WHEN status = 'ลงทะเบียนแล้ว' THEN 1 ELSE 0 END) as registered
+            FROM students_import $where";
+$stmt_stats = $conn->prepare($sql_stats);
+if (!empty($params)) { $stmt_stats->bind_param($types, ...$params); }
+$stmt_stats->execute();
+$stats_db = $stmt_stats->get_result()->fetch_assoc();
+$stmt_stats->close();
+
+$stats = [
+    "total" => (int)$stats_db['total'],
+    "registered" => (int)$stats_db['registered'],
+    "percent" => $stats_db['total'] > 0 ? round(($stats_db['registered'] / $stats_db['total']) * 100, 2) . '%' : '0%'
+];
+
+// รับข้อมูลภาพ Chart เท่านั้น
 $chart_image = $_POST['chart_image'] ?? '';
-$stats_json = $_POST['stats'] ?? '';
-$stats = !empty($stats_json) ? json_decode($stats_json, true) : null;
 
 // --- แยกการแสดงผลตาม Format ---
 
