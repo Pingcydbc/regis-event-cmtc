@@ -32,126 +32,186 @@ $show_login = isset($_GET['login']) || !empty($login_error);
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
-        body {
-            font-family: 'Sarabun', sans-serif;
-        }
+        body { font-family: 'Sarabun', sans-serif; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .animate-fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .card-shadow { box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08), 0 4px 15px -8px rgba(0, 0, 0, 0.04); }
+        .btn-hover { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .btn-hover:hover { transform: translateY(-1px); }
+        .btn-hover:active { transform: translateY(0); scale: 0.98; }
     </style>
 </head>
 
-<body class="bg-gradient-to-br from-slate-100 via-stone-50 to-red-50 flex flex-col items-center justify-center min-h-screen p-4 space-y-6">
+<body class="bg-[#f8fafc] flex flex-col items-center justify-center min-h-screen p-4 space-y-6">
 
-    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-8 border-red-600 transform transition-all hover:scale-[1.01] relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-red-500/5 rounded-full -mr-8 -mt-8"></div>
+    <div class="bg-white p-8 rounded-[2rem] card-shadow w-full max-w-sm border-t-[8px] border-red-700 transform transition-all relative overflow-hidden animate-fade-in">
+        <div class="absolute top-0 right-0 w-24 h-24 bg-red-50 rounded-full -mr-12 -mt-12 opacity-50"></div>
 
         <div class="flex flex-col items-center mb-8 relative z-10">
-            <div class="mb-5 drop-shadow-xl">
-                <img src="logo.png" alt="โลโก้วิทยาลัยเทคนิคเชียงใหม่" class="h-28 w-auto object-contain mx-auto">
+            <div class="mb-4">
+                <img src="logo.png" alt="โลโก้วิทยาลัยเทคนิคเชียงใหม่" class="h-24 w-auto object-contain drop-shadow-lg">
             </div>
-            <h2 class="text-2xl font-extrabold text-slate-800 text-center leading-tight">ระบบลงทะเบียนเข้าร่วม</h2>
-            <h2 class="text-2xl font-extrabold text-slate-800 text-center leading-tight">ประชุมผู้ปกครอง</h2>
-            <div class="h-1 w-16 bg-red-600 rounded-full my-3"></div>
-            <p class="text-base font-bold text-red-600">วิทยาลัยเทคนิคเชียงใหม่</p>
-            <p class="text-sm text-slate-500 font-medium mt-1">ประจำปีการศึกษา 2569</p>
+            <div class="space-y-1 text-center">
+                <h2 class="text-xl font-black text-slate-800 leading-tight">ระบบลงทะเบียนเข้าร่วม</h2>
+                <h2 class="text-xl font-black text-slate-800 leading-tight">ประชุมผู้ปกครอง</h2>
+                <h2 class="text-lg font-black text-red-700 leading-tight">วิทยาลัยเทคนิคเชียงใหม่</h2>
+            </div>
+            <div class="h-1 w-10 bg-red-600 rounded-full my-3 shadow-[0_0_8px_rgba(220,38,38,0.3)]"></div>
+            <p class="text-[10px] text-slate-400 font-black uppercase tracking-widest">ประจำปีการศึกษา 2569</p>
         </div>
 
         <form id="checkForm" class="space-y-6 relative z-10">
-            <div class="space-y-3">
-                <label class="block text-sm font-bold text-slate-700 text-center uppercase tracking-wide">กรอกเลขประจำตัวประชาชน</label>
-                <input type="text" id="id_card" name="id_card" placeholder="เช่น 150996600001" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();" class="w-full px-5 py-4 border-2 border-slate-200 rounded-2xl text-center text-2xl font-black tracking-[0.1em] focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-300 placeholder:tracking-normal text-sm">
+            <div class="space-y-2">
+                <label class="block text-[9px] font-black text-slate-400 text-center uppercase tracking-widest">กรอกเลขประจำตัวประชาชน (นักเรียน นักศึกษา)</label>
+                <input type="text" id="id_card" name="id_card" placeholder="เช่น 150996600001" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-xl font-black tracking-widest focus:ring-8 focus:ring-red-50 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-200">
             </div>
 
-            <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-red-200 text-lg flex items-center justify-center gap-3 transform hover:-translate-y-1 active:scale-95">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+            <div class="flex justify-center">
+                <button type="button" onclick="showFixStudentModal()" class="text-slate-400 hover:text-red-700 text-[9px] transition font-black flex items-center gap-1.5 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 hover:shadow-sm btn-hover">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    ไม่มีรายชื่อ? แจ้งเพิ่มที่นี่
+                </button>
+            </div>
+
+            <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-red-700/10 text-xs uppercase tracking-widest flex items-center justify-center gap-3 btn-hover">
                 ยืนยันข้อมูล
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
             </button>
         </form>
 
-        <div class="mt-6 text-center border-t border-slate-100 pt-4">
-            <span class="text-[10px] text-slate-400 tracking-wider uppercase">Chiang Mai Technical College</span>
+        <div class="mt-8 text-center border-t border-slate-50 pt-5">
+            <span class="text-[8px] text-slate-300 tracking-widest uppercase font-black">Chiang Mai Technical College</span>
         </div>
     </div>
 
-    <!-- ปุ่มลับสำหรับเข้าหน้า Login (หรือจะกด /dashboard ตรงๆ ก็ได้) -->
-    <a href="?login=1" class="text-slate-300 hover:text-slate-500 text-[10px] transition font-medium">จัดการระบบ</a>
+    <!-- ปุ่มลับสำหรับเข้าหน้า Login -->
+    <a href="?login=1" class="text-slate-300 hover:text-slate-500 text-[9px] transition font-black uppercase tracking-widest opacity-50 hover:opacity-100">จัดการระบบ</a>
+
+    <!-- Chat Widget (Persistent) -->
+    <div id="chat_widget" class="fixed bottom-4 right-4 z-[100] flex flex-col items-end gap-4 max-w-[calc(100vw-2rem)]">
+        <!-- Chat Window -->
+        <div id="chat_window" class="hidden w-[300px] sm:w-[350px] h-[480px] max-h-[75vh] bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col border border-slate-100 transition-all duration-500 transform translate-y-4 opacity-0">
+            <div class="bg-red-700 p-5 text-white flex justify-between items-center shadow-lg shrink-0">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md shadow-inner">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" /></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-black text-xs uppercase tracking-wider leading-none">ศูนย์รับเรื่อง</h4>
+                        <p class="text-[8px] text-red-200 uppercase tracking-widest mt-1 flex items-center gap-1">
+                            <span class="w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
+                            เจ้าหน้าที่ออนไลน์
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <!-- ปุ่มย่อแชท -->
+                    <button onclick="toggleChat()" class="bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-all" title="ย่อหน้าต่าง">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" /></svg>
+                    </button>
+                    <!-- ปุ่มจบแชท (กากบาท) -->
+                    <button onclick="endChat()" class="bg-white/5 hover:bg-white/10 p-2 rounded-lg transition-all" title="จบการสนทนาและลบข้อมูล">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+            </div>
+            
+            <div id="chat_body" class="flex-1 overflow-y-auto p-5 space-y-4 bg-slate-50/50 custom-scrollbar">
+                <div class="text-center py-16 text-slate-300 text-[9px] font-black uppercase tracking-widest italic">กำลังเริ่มการสนทนา...</div>
+            </div>
+
+            <form id="chat_form" class="p-4 bg-white border-t border-slate-100 flex gap-2 shrink-0 items-center">
+                <input type="text" id="chat_input" placeholder="พิมพ์ข้อความที่นี่..." autocomplete="off" class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-3 text-xs font-bold focus:ring-4 focus:ring-red-50 focus:border-red-600 outline-none transition-all">
+                <button type="submit" class="bg-red-700 text-white w-10 h-10 rounded-xl hover:bg-red-800 transition-all shadow-lg flex items-center justify-center shrink-0 btn-hover group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" viewBox="0 0 20 20" fill="currentColor"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" /></svg>
+                </button>
+            </form>
+        </div>
+
+        <!-- Floating Button -->
+        <button id="chat_toggle_btn" onclick="toggleChat()" class="bg-red-600 hover:bg-red-700 text-white font-black p-3 px-5 rounded-full shadow-xl transition-all duration-300 transform hover:scale-105 flex items-center gap-3 border border-white/10">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <span class="text-[10px] uppercase tracking-widest font-black">ติดต่อเรา</span>
+            <span id="chat_badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-800 rounded-full border-2 border-white animate-pulse"></span>
+        </button>
+    </div>
 
     <!-- Modal ลงทะเบียน -->
-    <div id="modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center p-4 backdrop-blur-sm z-50">
-        <div class="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md space-y-5 transform transition-all duration-300 border-t-4 border-red-600">
-            <h3 class="text-lg font-bold text-slate-800 border-b pb-2 text-center text-red-600 flex items-center justify-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" />
-                </svg>
+    <div id="modal" class="fixed inset-0 bg-slate-900/60 hidden items-center justify-center p-4 backdrop-blur-md z-50">
+        <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl w-full max-w-sm space-y-6 transform transition-all duration-500 border-t-[10px] border-red-700 animate-fade-in">
+            <h3 class="text-lg font-black text-slate-800 pb-3 text-center border-b border-slate-50 uppercase tracking-tight flex items-center justify-center gap-2.5">
+                <div class="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center text-red-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd" /></svg>
+                </div>
                 ตรวจสอบข้อมูลผู้ลงทะเบียน
             </h3>
 
-            <div class="space-y-2.5 text-sm border-b pb-4 border-slate-100">
-                <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">เลขบัตรประชาชน:</span>
-                    <span id="modal_id_card" class="font-bold text-slate-800 tracking-wider">-</span>
+            <div class="space-y-3.5 text-xs font-bold border-b border-slate-50 pb-6">
+                <div class="flex items-center justify-between bg-slate-50 p-3.5 rounded-2xl">
+                    <span class="text-slate-400 uppercase tracking-widest text-[8px]">National ID:</span>
+                    <span id="modal_id_card" class="text-slate-800 tracking-widest font-black text-sm">1234567890123</span>
                 </div>
-                <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อ-นามสกุล ผู้เรียน:</span>
-                    <span id="modal_student_name" class="font-bold text-slate-800">-</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">ชื่อกลุ่มเรียน:</span>
-                    <span id="modal_student_class" class="font-bold text-slate-800">-</span>
-                </div>
-                <div class="flex items-start">
-                    <span class="text-slate-400 font-medium w-32 shrink-0">แผนกวิชา:</span>
-                    <span id="modal_department" class="font-bold text-red-700">-</span>
+                <div class="space-y-2.5 px-1.5">
+                    <div class="flex justify-between items-center gap-4">
+                        <span class="text-slate-300 uppercase tracking-widest text-[8px] shrink-0">ชื่อนักเรียน</span>
+                        <span id="modal_student_name" class="text-slate-800 font-black text-right truncate">นายสมชาย แสนดี</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-4">
+                        <span class="text-slate-300 uppercase tracking-widest text-[8px] shrink-0">กลุ่มเรียน</span>
+                        <span id="modal_student_class" class="text-slate-800 font-black text-right">IT.67.1</span>
+                    </div>
+                    <div class="flex justify-between items-center gap-4">
+                        <span class="text-slate-300 uppercase tracking-widest text-[8px] shrink-0">แผนกวิชา</span>
+                        <span id="modal_department" class="text-red-700 font-black text-right truncate">เทคโนโลยีสารสนเทศ</span>
+                    </div>
                 </div>
             </div>
 
-            <form id="registerForm" class="space-y-4">
+            <form id="registerForm" class="space-y-5">
                 <input type="hidden" id="modal_id_card_val" name="modal_id_card_val">
-                <div>
-                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">ชื่อ-นามสกุล ผู้ปกครอง (ตรวจสอบ/แก้ไขได้)</label>
-                    <input type="text" id="modal_parent_name" name="modal_parent_name" required autocomplete="off" class="w-full px-4 py-3 border border-slate-300 rounded-xl font-medium focus:ring-4 focus:ring-red-100 focus:border-red-600 outline-none transition text-slate-800">
+                <div class="group">
+                    <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 transition-colors group-focus-within:text-red-600">ชื่อ-นามสกุล ผู้ปกครอง (แก้ไขได้)</label>
+                    <input type="text" id="modal_parent_name" name="modal_parent_name" required autocomplete="off" class="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-xl font-black focus:ring-4 focus:ring-red-50 focus:border-red-600 outline-none transition-all text-slate-800 text-sm">
                 </div>
 
-                <div class="flex space-x-3 pt-2">
-                    <button type="button" onclick="closeModal()" class="w-1/3 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-3 rounded-xl transition duration-150">ยกเลิก</button>
-                    <button type="submit" class="w-2/3 bg-red-600 hover:bg-red-700 text-white font-medium py-3 rounded-xl transition duration-150 shadow-lg shadow-red-100">ยืนยันการลงทะเบียน</button>
+                <div class="flex gap-3 pt-2">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-400 font-black py-4 rounded-xl transition-all text-[9px] uppercase tracking-widest btn-hover">ยกเลิก</button>
+                    <button type="submit" class="flex-[2] bg-red-700 hover:bg-red-800 text-white font-black py-4 rounded-xl transition-all shadow-lg text-[9px] uppercase tracking-widest btn-hover">ยืนยันลงทะเบียน</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- 🌟 Modal Login (สำหรับ Admin) -->
-    <div id="loginModal" class="fixed inset-0 bg-black/70 <?php echo $show_login ? 'flex' : 'hidden'; ?> items-center justify-center p-4 backdrop-blur-md z-[60]">
-        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border-t-8 border-slate-800 relative transform transition-all scale-100">
-            <button onclick="closeLoginModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/80 <?php echo $show_login ? 'flex' : 'hidden'; ?> items-center justify-center p-4 backdrop-blur-xl z-[60]">
+        <div class="bg-white p-10 rounded-[2.5rem] shadow-2xl w-full max-w-sm border-t-[10px] border-slate-900 relative transform transition-all animate-fade-in">
+            <button onclick="closeLoginModal()" class="absolute top-6 right-6 text-slate-300 hover:text-slate-900 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
-            
-            <div class="flex flex-col items-center mb-6">
-                <img src="logo.png" alt="Logo" class="h-16 mb-4">
-                <h2 class="text-xl font-bold text-slate-800">เข้าสู่ระบบจัดการ</h2>
-                <p class="text-xs text-slate-500">วิทยาลัยเทคนิคเชียงใหม่</p>
+            <div class="flex flex-col items-center mb-8">
+                <img src="logo.png" alt="Logo" class="h-16 mb-4 drop-shadow-lg">
+                <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight">เข้าสู่ระบบจัดการ</h2>
+                <p class="text-[9px] text-slate-400 font-black uppercase tracking-widest mt-1.5 italic">Authorized Access Only</p>
             </div>
-
             <?php if ($login_error): ?>
-                <div class="bg-red-50 text-red-600 p-3 rounded-xl text-xs mb-4 text-center border border-red-100 font-bold">
-                    <?php echo $login_error; ?>
-                </div>
+                <div class="bg-red-50 text-red-600 p-3 rounded-xl text-[9px] mb-6 text-center border border-red-100 font-black uppercase tracking-widest animate-pulse"><?php echo $login_error; ?></div>
             <?php endif; ?>
-
-            <form method="POST" class="space-y-4">
+            <form method="POST" class="space-y-5">
                 <input type="hidden" name="login_action" value="1">
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">ชื่อผู้ใช้</label>
-                    <input type="text" name="username" required class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-4 focus:ring-slate-100 focus:border-slate-800 outline-none transition">
+                <div class="space-y-1.5">
+                    <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Username</label>
+                    <input type="text" name="username" required class="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-xl font-black focus:ring-4 focus:ring-slate-100 focus:border-slate-900 outline-none transition-all text-sm">
                 </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">รหัสผ่าน</label>
-                    <input type="password" name="password" required class="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-4 focus:ring-slate-100 focus:border-slate-800 outline-none transition">
+                <div class="space-y-1.5">
+                    <label class="block text-[8px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
+                    <input type="password" name="password" required class="w-full px-5 py-3.5 bg-slate-50 border-2 border-slate-100 rounded-xl font-black focus:ring-4 focus:ring-slate-100 focus:border-slate-900 outline-none transition-all text-sm">
                 </div>
-                <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3.5 rounded-xl transition shadow-lg mt-4 uppercase tracking-wider text-sm">
-                    ลงชื่อเข้าใช้งาน
-                </button>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-black text-white font-black py-4 rounded-xl transition-all shadow-lg mt-4 uppercase tracking-widest text-[10px] btn-hover">เข้าสู่ระบบ</button>
             </form>
         </div>
     </div>
@@ -163,7 +223,6 @@ $show_login = isset($_GET['login']) || !empty($login_error);
         const loginModal = document.getElementById('loginModal');
         function closeLoginModal() { 
             loginModal.classList.replace('flex', 'hidden'); 
-            // ลบ query string ?login=1 ออกจาก URL เพื่อความสวยงาม
             const newUrl = window.location.pathname;
             window.history.replaceState({}, document.title, newUrl);
         }
@@ -171,11 +230,9 @@ $show_login = isset($_GET['login']) || !empty($login_error);
         document.getElementById('checkForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const id_card = document.getElementById('id_card').value;
-
             try {
                 const response = await fetch('process.php?action=check&id_card=' + id_card);
                 const data = await response.json();
-
                 if (data.success) {
                     document.getElementById('modal_id_card_val').value = id_card;
                     document.getElementById('modal_id_card').innerText = data.id_card;
@@ -183,76 +240,180 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                     document.getElementById('modal_department').innerText = data.department;
                     document.getElementById('modal_student_class').innerText = data.group_name;
                     document.getElementById('modal_parent_name').value = data.parent_name;
-
                     modal.classList.replace('hidden', 'flex');
                 } else {
-                    if (data.message.includes('ลงทะเบียนเสร็จสิ้นไปแล้ว')) {
-                        Swal.fire({
-                            icon: 'info', 
-                            title: 'ลงทะเบียนแล้ว', 
-                            text: data.message,
-                            confirmButtonText: 'รับทราบ',
-                            confirmButtonColor: '#3085d6',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error', title: 'ไม่พบข้อมูล', text: data.message,
-                            confirmButtonText: 'ลองอีกครั้ง', confirmButtonColor: '#dc2626',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
-                    }
+                    Swal.fire({ icon: data.message.includes('แล้ว') ? 'info' : 'error', title: 'แจ้งเตือน', text: data.message, confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' } });
                 }
             } catch (error) {
-                console.error(error);
-                Swal.fire({
-                    icon: 'error', title: 'เชื่อมต่อล้มเหลว', text: 'ระบบขัดข้อง ไม่สามารถติดต่อไฟล์ประมวลผลได้',
-                    confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' }
-                });
+                Swal.fire({ icon: 'error', title: 'ผิดพลาด', text: 'ระบบขัดข้อง', confirmButtonColor: '#dc2626' });
             }
         });
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const formData = new FormData(e.target);
-
             try {
                 const response = await fetch('process.php?action=register', { method: 'POST', body: formData });
                 const data = await response.json();
-
                 if (data.success) {
-                    Swal.fire({
-                        icon: 'success', title: 'ลงทะเบียนสำเร็จ!', text: data.message,
-                        confirmButtonText: 'ตกลง', confirmButtonColor: '#16a34a',
-                        customClass: { popup: 'rounded-2xl' }
-                    }).then(() => {
-                        closeModal();
-                        document.getElementById('checkForm').reset();
-                    });
+                    Swal.fire({ icon: 'success', title: 'สำเร็จ!', text: data.message, confirmButtonColor: '#16a34a' }).then(() => { closeModal(); document.getElementById('checkForm').reset(); });
                 } else {
-                    if (data.message.includes('ถูกลงทะเบียนไปก่อนหน้า')) {
-                         Swal.fire({
-                            icon: 'info',
-                            title: 'ลงทะเบียนแล้ว',
-                            text: data.message,
-                            confirmButtonColor: '#3085d6', confirmButtonText: 'ปิดหน้าต่าง',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'warning', title: 'ปฏิเสธการลงทะเบียน', text: data.message,
-                            confirmButtonColor: '#ea580c', confirmButtonText: 'ปิดหน้าต่าง',
-                            customClass: { popup: 'rounded-2xl' }
-                        });
-                    }
+                    Swal.fire({ icon: 'warning', text: data.message, confirmButtonColor: '#ea580c' });
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: 'error', title: 'เกิดข้อผิดพลาด', text: 'ระบบขัดข้อง ไม่สามารถบันทึกข้อมูลได้',
-                    confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-2xl' }
-                });
+                Swal.fire({ icon: 'error', text: 'ระบบขัดข้อง', confirmButtonColor: '#dc2626' });
             }
         });
+
+        // --- Chat Logic ---
+        let chatPollInterval = null;
+        let lastMessageCount = 0;
+
+        function toggleChat() {
+            const window = document.getElementById('chat_window');
+            const isHidden = window.classList.contains('hidden');
+            if (isHidden) {
+                window.classList.remove('hidden');
+                setTimeout(() => { window.classList.remove('translate-y-4', 'opacity-0'); window.classList.add('translate-y-0', 'opacity-100'); }, 10);
+                startPolling();
+                document.getElementById('chat_badge').classList.add('hidden');
+            } else {
+                window.classList.remove('translate-y-0', 'opacity-100');
+                window.classList.add('translate-y-4', 'opacity-0');
+                setTimeout(() => window.classList.add('hidden'), 300);
+                stopPolling();
+            }
+        }
+
+        async function endChat() {
+            const result = await Swal.fire({
+                title: 'จบการสนทนา?',
+                text: "ข้อมูลการแชททั้งหมดจะถูกลบออกจากระบบ",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'ยืนยัน จบการสนทนา',
+                cancelButtonText: 'ยกเลิก',
+                customClass: { popup: 'rounded-3xl' }
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch('msg_system.php?action=clear_chat');
+                    const data = await res.json();
+                    if (data.success) {
+                        lastMessageCount = 0;
+                        fetchMessages();
+                        toggleChat();
+                        Swal.fire({ icon: 'success', title: 'จบการสนทนาแล้ว', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-2xl' } });
+                    }
+                } catch (e) {
+                    console.error("End Chat Error:", e);
+                }
+            }
+        }
+
+        async function fetchMessages() {
+            try {
+                const res = await fetch('msg_system.php?action=get_messages', { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+                const text = await res.text();
+                if (text.includes('<html>')) return;
+                const data = JSON.parse(text);
+                if (data.success) {
+                    renderMessages(data.messages, data.my_id);
+                    if (data.messages.length > lastMessageCount) {
+                        const body = document.getElementById('chat_body');
+                        body.scrollTop = body.scrollHeight;
+                        if (document.getElementById('chat_window').classList.contains('hidden') && lastMessageCount > 0) document.getElementById('chat_badge').classList.remove('hidden');
+                    }
+                    lastMessageCount = data.messages.length;
+                }
+            } catch (e) {}
+        }
+
+        function renderMessages(messages, myId) {
+            const body = document.getElementById('chat_body');
+            if (messages.length === 0) { body.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs italic">เริ่มการสนทนากับเราได้ที่นี่...</div>'; return; }
+            body.innerHTML = messages.map(msg => {
+                const isMe = msg.sender_type === 'user';
+                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'} p-3 shadow-sm relative"><p class="text-sm leading-relaxed">${msg.message}</p><span class="text-[9px] ${isMe ? 'text-blue-200' : 'text-slate-400'} block mt-1 text-right">${msg.time}</span></div></div>`;
+            }).join('');
+        }
+
+        function startPolling() { fetchMessages(); chatPollInterval = setInterval(fetchMessages, 7000); }
+        function stopPolling() { clearInterval(chatPollInterval); }
+
+        document.getElementById('chat_form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('chat_input');
+            const msg = input.value.trim();
+            if (!msg) return;
+            input.value = '';
+            const formData = new FormData();
+            formData.append('message', msg);
+            try {
+                const res = await fetch('msg_system.php?action=send', { method: 'POST', body: formData });
+                const data = await res.json();
+                if (data.success) fetchMessages();
+            } catch (e) {}
+        });
+
+        // --- Fix Student Modal ---
+        async function showFixStudentModal() {
+            Swal.fire({ title: 'กำลังโหลดข้อมูล...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); } });
+            try {
+                const res = await fetch('process_fix.php?action=get_options');
+                const data = await res.json();
+                if (!data.success) { Swal.fire('ผิดพลาด', 'โหลดข้อมูลไม่สำเร็จ', 'error'); return; }
+                const deptOpts = data.departments.map(d => `<option value="${d}">${d}</option>`).join('');
+                Swal.fire({
+                    title: '<h3 class="text-xl font-bold"></h3>',
+                    html: `<div class="text-left space-y-4 p-2">
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">เลขประจำตัวนักศึกษา</label><input type="text" id="fix_student_id" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="รหัสนักศึกษา"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล นักศึกษา</label><input type="text" id="fix_student_name" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="ชื่อ-นามสกุล"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อ-นามสกุล ผู้ปกครอง</label><input type="text" id="fix_parent_name" class="w-full px-4 py-3 border rounded-xl outline-none" placeholder="ชื่อผู้ปกครอง"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">แผนกวิชา</label><select id="fix_department" class="w-full px-4 py-3 border rounded-xl outline-none"><option value="">-- เลือกแผนก --</option>${deptOpts}</select></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400 uppercase">ชื่อกลุ่มเรียน</label><select id="fix_group_name" class="w-full px-4 py-3 border rounded-xl outline-none"><option value="">-- กรุณาเลือกแผนกก่อน --</option></select></div>
+                    </div>`,
+                    showCancelButton: true, confirmButtonText: 'บันทึกข้อมูล', confirmButtonColor: '#dc2626', customClass: { popup: 'rounded-3xl' },
+                    didOpen: () => {
+                        const dSel = Swal.getPopup().querySelector('#fix_department');
+                        const gSel = Swal.getPopup().querySelector('#fix_group_name');
+                        dSel.addEventListener('change', async () => {
+                            if (!dSel.value) { gSel.innerHTML = '<option value="">-- กรุณาเลือกแผนกก่อน --</option>'; return; }
+                            gSel.innerHTML = '<option value="">กำลังโหลด...</option>';
+                            try {
+                                const gRes = await fetch('process_fix.php?action=get_options&department=' + encodeURIComponent(dSel.value));
+                                const gData = await gRes.json();
+                                gSel.innerHTML = '<option value="">-- เลือกกลุ่มเรียน --</option>' + gData.groups.map(g => `<option value="${g}">${g}</option>`).join('');
+                            } catch (e) {}
+                        });
+                    },
+                    preConfirm: () => {
+                        const sid = Swal.getPopup().querySelector('#fix_student_id').value;
+                        const sname = Swal.getPopup().querySelector('#fix_student_name').value;
+                        const pname = Swal.getPopup().querySelector('#fix_parent_name').value;
+                        const dept = Swal.getPopup().querySelector('#fix_department').value;
+                        const grp = Swal.getPopup().querySelector('#fix_group_name').value;
+                        if (!sid || !sname || !pname || !dept || !grp) { Swal.showValidationMessage('กรุณากรอกข้อมูลให้ครบถ้วน'); }
+                        return { student_id: sid, student_name: sname, parent_name: pname, department: dept, group_name: grp };
+                    }
+                }).then(r => { if (r.isConfirmed) saveFixStudent(r.value); });
+            } catch (e) { Swal.fire('ผิดพลาด', 'ติดต่อเซิร์ฟเวอร์ไม่ได้', 'error'); }
+        }
+
+        async function saveFixStudent(data) {
+            const fd = new FormData(); for (const k in data) fd.append(k, data[k]);
+            try {
+                const res = await fetch('process_fix.php?action=save', { method: 'POST', body: fd });
+                const rd = await res.json();
+                Swal.fire({ icon: rd.success ? 'success' : 'error', text: rd.message, confirmButtonColor: rd.success ? '#16a34a' : '#dc2626' });
+            } catch (e) { Swal.fire({ icon: 'error', text: 'บันทึกไม่สำเร็จ' }); }
+        }
+
+        fetchMessages();
+        setInterval(fetchMessages, 15000);
     </script>
 </body>
 </html>
