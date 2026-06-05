@@ -69,13 +69,6 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                 <input type="text" id="id_card" name="id_card" placeholder="เช่น 150996600001" required autocomplete="off" oninput="this.value = this.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();" class="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-center text-xl font-black tracking-widest focus:ring-8 focus:ring-red-50 focus:border-red-600 outline-none transition-all duration-300 text-slate-800 placeholder:text-slate-200">
             </div>
 
-            <div class="flex justify-center">
-                <button type="button" onclick="showFixStudentModal()" class="text-slate-400 hover:text-red-700 text-[9px] transition font-black flex items-center gap-1.5 uppercase tracking-widest bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 hover:shadow-sm btn-hover">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                    ไม่มีรายชื่อ? แจ้งเพิ่มที่นี่
-                </button>
-            </div>
-
             <button type="submit" class="w-full bg-red-700 hover:bg-red-800 text-white font-black py-4 rounded-2xl transition-all duration-300 shadow-xl shadow-red-700/10 text-xs uppercase tracking-widest flex items-center justify-center gap-3 btn-hover">
                 ยืนยันข้อมูล
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
@@ -100,7 +93,7 @@ $show_login = isset($_GET['login']) || !empty($login_error);
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clip-rule="evenodd" /></svg>
                     </div>
                     <div>
-                        <h4 class="font-black text-xs uppercase tracking-wider leading-none">ศูนย์รับเรื่อง</h4>
+                        <h4 class="font-black text-xs uppercase tracking-wider leading-none">แจ้งปัญหา</h4>
                         <p class="text-[8px] text-red-200 uppercase tracking-widest mt-1 flex items-center gap-1">
                             <span class="w-1 h-1 bg-green-400 rounded-full animate-pulse"></span>
                             เจ้าหน้าที่ออนไลน์
@@ -389,8 +382,13 @@ $show_login = isset($_GET['login']) || !empty($login_error);
             if (messages.length === 0) { body.innerHTML = '<div class="text-center py-10 text-slate-400 text-xs italic">เริ่มการสนทนากับเราได้ที่นี่...</div>'; return; }
             body.innerHTML = messages.map(msg => {
                 const isMe = msg.sender_type === 'user';
-                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[80%] ${isMe ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'} p-3 shadow-sm relative"><p class="text-sm leading-relaxed">${escapeHtml(msg.message)}</p><span class="text-[9px] ${isMe ? 'text-blue-200' : 'text-slate-400'} block mt-1 text-right">${msg.time}</span></div></div>`;
+                return `<div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in"><div class="max-w-[80%] ${isMe ? 'bg-red-700 text-white rounded-2xl rounded-tr-none' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100'} p-3 shadow-sm relative"><p class="text-sm leading-relaxed">${linkify(escapeHtml(msg.message))}</p><span class="text-[9px] ${isMe ? 'text-red-200' : 'text-slate-400'} block mt-1 text-right">${msg.time}</span></div></div>`;
             }).join('');
+        }
+
+        function linkify(text) {
+            const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+            return text.replace(urlPattern, '<a href="$1" target="_blank" class="underline hover:opacity-80 transition-opacity">$1</a>');
         }
 
         function escapeHtml(text) {

@@ -207,5 +207,13 @@ if ($action == 'search_students') {
     send_json_response(true, "พบข้อมูล " . count($list) . " รายการ", ["list" => $list]);
 }
 
+// 6. ลบข้อมูลและออกจากระบบ
+if ($action == 'logout') {
+    if (session_status() === PHP_SESSION_NONE) { session_start(); }
+    $_SESSION = array();
+    session_destroy();
+    send_json_response(true, "ออกจากระบบเรียบร้อยแล้ว");
+}
+
 send_json_response(false, "Invalid Action");
 ?>

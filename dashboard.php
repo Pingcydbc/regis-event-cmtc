@@ -55,7 +55,7 @@ if (!check_auth()) {
                     ศูนย์รับเรื่องแชท
                     <span id="total_unread" class="hidden bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-black animate-bounce shadow-md">0</span>
                 </button>
-                <a href="logout.php" class="bg-slate-900/40 hover:bg-slate-900 text-[10px] px-4 py-2 rounded-xl transition-all font-black border border-white/10 uppercase btn-hover">ออกจากระบบ</a>
+                <button onclick="handleLogout()" class="bg-slate-900/40 hover:bg-slate-900 text-[10px] px-4 py-2 rounded-xl transition-all font-black border border-white/10 uppercase btn-hover">ออกจากระบบ</button>
             </div>
         </div>
     </nav>
@@ -240,7 +240,7 @@ if (!check_auth()) {
             <div id="chat_sidebar" class="w-full sm:w-[300px] border-r border-slate-100 flex flex-col bg-slate-50/30 transition-all duration-300">
                 <div class="p-6 border-b border-slate-100 bg-white shrink-0">
                     <h3 class="font-black text-slate-800 text-xl flex items-center gap-3">
-                        <div class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg">
+                        <div class="w-10 h-10 bg-red-700 rounded-xl flex items-center justify-center text-white shadow-lg">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z"></path></svg>
                         </div>
                         ห้องสนทนา
@@ -284,8 +284,8 @@ if (!check_auth()) {
                 </div>
 
                 <form id="admin_chat_form" class="p-4 border-t border-slate-100 bg-white hidden flex gap-3 shrink-0 items-center">
-                    <input type="text" id="admin_chat_input" placeholder="พิมพ์ข้อความตอบกลับ..." autocomplete="off" class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-blue-50/50 focus:border-blue-500 transition-all">
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white w-12 h-12 rounded-xl transition shadow-lg flex items-center justify-center shrink-0 group btn-hover">
+                    <input type="text" id="admin_chat_input" placeholder="พิมพ์ข้อความตอบกลับ..." autocomplete="off" class="flex-1 bg-slate-50 border-2 border-slate-100 rounded-xl px-5 py-3 text-sm font-bold outline-none focus:ring-4 focus:ring-red-50/50 focus:border-red-700 transition-all">
+                    <button type="submit" class="bg-red-700 hover:bg-red-800 text-white w-12 h-12 rounded-xl transition shadow-lg flex items-center justify-center shrink-0 group btn-hover">
                         <svg class="w-5 h-5 transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"></path></svg>
                     </button>
                 </form>
@@ -345,14 +345,10 @@ if (!check_auth()) {
             try {
                 const res = await fetch(`process_admin.php?action=get_stats&department=${encodeURIComponent(dept)}&group_name=${encodeURIComponent(grp)}`);
                 const text = await res.text();
-                
-                // ตรวจสอบว่าสิ่งที่ส่งกลับมาคือ JSON หรือไม่
                 if (!text.trim().startsWith('{')) {
-                    console.error("เซิร์ฟเวอร์ส่งค่ากลับมาผิดพลาด (ไม่ใช่ JSON):", text);
                     if (text.includes('login') || text.includes('Direct access')) window.location.href = 'index.php?login=1';
                     return;
                 }
-
                 const data = JSON.parse(text);
                 if (data.success) {
                     currentStats = { registered: data.registered, total: data.total, percent: data.percent };
@@ -366,14 +362,7 @@ if (!check_auth()) {
                     renderChart(data.registered, data.total - data.registered);
                     if(isAuto) timer = 30;
                 }
-            } catch (e) { 
-                console.error("Fetch Error:", e);
-                if (text.includes('aes.js') || text.includes('__test=')) {
-                    // กรณีติด Anti-Bot ของ InfinityFree
-                    const timerDisp = document.getElementById('refresh_timer');
-                    if (timerDisp) timerDisp.innerHTML = '<span class="text-red-400">ติดระบบป้องกันบอท กรุณารีเฟรชหน้าเว็บ</span>';
-                }
-            }
+            } catch (e) {}
         }
 
         setInterval(() => {
@@ -387,29 +376,21 @@ if (!check_auth()) {
             const q = e.target.value.trim();
             if (q.length < 2) { document.getElementById('searchResults').classList.add('hidden'); return; }
             searchTimeout = setTimeout(async () => {
-            try {
-                const res = await fetch(`process_admin.php?action=search_students&query=${encodeURIComponent(q)}`);
-                const data = await res.json();
-                const tbody = document.getElementById('searchResultsBody');
-                tbody.innerHTML = '';
-                if (data.success && data.list.length > 0) {
-                    data.list.forEach(item => {
-                        const badge = item.source === 'หลัก' 
-                            ? '<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-slate-200">Main</span>' 
-                            : '<span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-amber-100">Added</span>';
-                        tbody.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50/80 transition-colors group"><td class="px-6 py-4">${badge}</td><td class="px-6 py-4 font-mono text-xs text-slate-400 group-hover:text-slate-900 transition-colors">${escapeHtml(item.student_id)}</td><td class="px-6 py-4 font-black text-slate-800">${escapeHtml(item.student_name)}</td><td class="px-6 py-4 text-slate-400 font-bold text-[10px] group-hover:text-slate-600 transition-colors">${escapeHtml(item.group_name)}</td><td class="px-6 py-4 text-right"><span class="${item.status === 'ลงทะเบียนแล้ว' ? 'text-emerald-600' : 'text-slate-200'} font-black text-[10px] uppercase">${escapeHtml(item.status)}</span></td></tr>`);
-                    });
-                    document.getElementById('searchResults').classList.remove('hidden');
-                } else { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-300 italic font-black uppercase tracking-widest text-[9px]">ไม่พบข้อมูลที่ค้นหา</td></tr>'; document.getElementById('searchResults').classList.remove('hidden'); }
-            } catch (e) { console.error(e); }
+                try {
+                    const res = await fetch(`process_admin.php?action=search_students&query=${encodeURIComponent(q)}`);
+                    const data = await res.json();
+                    const tbody = document.getElementById('searchResultsBody');
+                    tbody.innerHTML = '';
+                    if (data.success && data.list.length > 0) {
+                        data.list.forEach(item => {
+                            const badge = '<span class="bg-slate-100 text-slate-500 px-2.5 py-1 rounded-lg text-[8px] font-black uppercase tracking-tighter border border-slate-200">Main</span>';
+                            tbody.insertAdjacentHTML('beforeend', `<tr class="hover:bg-slate-50/80 transition-colors group"><td class="px-6 py-4">${badge}</td><td class="px-6 py-4 font-mono text-xs text-slate-400 group-hover:text-slate-900 transition-colors">${escapeHtml(item.student_id)}</td><td class="px-6 py-4 font-black text-slate-800">${escapeHtml(item.student_name)}</td><td class="px-6 py-4 text-slate-400 font-bold text-[10px] group-hover:text-slate-600 transition-colors">${escapeHtml(item.group_name)}</td><td class="px-6 py-4 text-right"><span class="${item.status === 'ลงทะเบียนแล้ว' ? 'text-emerald-600' : 'text-slate-200'} font-black text-[10px] uppercase">${escapeHtml(item.status)}</span></td></tr>`);
+                        });
+                        document.getElementById('searchResults').classList.remove('hidden');
+                    } else { tbody.innerHTML = '<tr><td colspan="5" class="p-8 text-center text-slate-300 italic font-black uppercase tracking-widest text-[9px]">ไม่พบข้อมูลที่ค้นหา</td></tr>'; document.getElementById('searchResults').classList.remove('hidden'); }
+                } catch (e) {}
             }, 300);
-            });
-
-            function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text || '';
-            return div.innerHTML;
-            }
+        });
 
         function renderChart(reg, nreg) {
             const ctx = document.getElementById('regChart').getContext('2d');
@@ -421,15 +402,20 @@ if (!check_auth()) {
         function switchView(view) {
             const stats = document.getElementById('stats_view');
             const chats = document.getElementById('chats_view');
+            stats.classList.add('hidden'); 
+            chats.classList.add('hidden'); 
+            document.getElementById('nav_stats').classList.remove('hidden'); 
+            document.getElementById('nav_chats').classList.remove('hidden');
+            document.getElementById('refresh_timer').classList.add('hidden');
+
             if (view === 'stats') {
-                stats.classList.remove('hidden'); chats.classList.add('hidden');
-                document.getElementById('nav_stats').classList.add('hidden'); document.getElementById('nav_chats').classList.remove('hidden');
+                stats.classList.remove('hidden');
+                document.getElementById('nav_stats').classList.add('hidden');
                 document.getElementById('refresh_timer').classList.remove('hidden');
                 stopAdminChatPolling(); closeChatMobile();
-            } else {
-                stats.classList.add('hidden'); chats.classList.remove('hidden');
-                document.getElementById('nav_stats').classList.remove('hidden'); document.getElementById('nav_chats').classList.add('hidden');
-                document.getElementById('refresh_timer').classList.add('hidden');
+            } else if (view === 'chats') {
+                chats.classList.remove('hidden');
+                document.getElementById('nav_chats').classList.add('hidden');
                 startAdminChatPolling();
             }
         }
@@ -451,11 +437,11 @@ if (!check_auth()) {
                     if (data.users.length === 0) { listDiv.innerHTML = '<div class="py-16 text-center text-slate-300 font-black italic text-[9px] uppercase tracking-widest">ไม่มีข้อความใหม่</div>'; return; }
                     listDiv.innerHTML = data.users.map(u => {
                         const active = activeChatUser === u.sender_id;
-                        return `<button onclick="selectChatUser('${u.sender_id}')" class="w-full text-left p-4 rounded-2xl transition-all duration-300 ${active ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20 scale-[0.98]' : 'bg-white hover:bg-slate-50 border border-slate-100'} flex items-center gap-3 group">
-                            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${active ? 'bg-white/20' : 'bg-blue-50 text-blue-600'} font-black text-[10px] uppercase shadow-inner border border-black/5">${u.sender_id.substring(5, 7)}</div>
+                        return `<button onclick="selectChatUser('${u.sender_id}')" class="w-full text-left p-4 rounded-2xl transition-all duration-300 ${active ? 'bg-red-700 text-white shadow-xl shadow-red-600/20 scale-[0.98]' : 'bg-white hover:bg-slate-50 border border-slate-100'} flex items-center gap-3 group">
+                            <div class="w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center ${active ? 'bg-white/20' : 'bg-red-50 text-red-600'} font-black text-[10px] uppercase shadow-inner border border-black/5">${u.sender_id.substring(5, 7)}</div>
                             <div class="flex-1 min-w-0">
-                                <div class="flex justify-between items-center mb-0.5"><span class="font-black text-xs truncate tracking-tight">${u.sender_id}</span><span class="text-[7px] font-black ${active ? 'text-blue-100' : 'text-slate-300'} uppercase tracking-tighter">${u.time_fmt}</span></div>
-                                <p class="text-[10px] truncate ${active ? 'text-blue-50' : 'text-slate-400'} font-bold">${u.last_message || '...'}</p>
+                                <div class="flex justify-between items-center mb-0.5"><span class="font-black text-xs truncate tracking-tight">${u.sender_id}</span><span class="text-[7px] font-black ${active ? 'text-red-100' : 'text-slate-300'} uppercase tracking-tighter">${u.time_fmt}</span></div>
+                                <p class="text-[10px] truncate ${active ? 'text-red-50' : 'text-slate-400'} font-bold">${u.last_message || '...'}</p>
                             </div>
                             ${u.unread_count > 0 && !active ? `<span class="bg-red-500 text-white text-[7px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-lg border-2 border-white animate-pulse">${u.unread_count}</span>` : ''}
                         </button>`;
@@ -464,7 +450,7 @@ if (!check_auth()) {
                     const badge = document.getElementById('total_unread');
                     if (total > 0) { badge.innerText = total; badge.classList.remove('hidden'); } else { badge.classList.add('hidden'); }
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {}
         }
 
         function selectChatUser(uid) {
@@ -489,16 +475,21 @@ if (!check_auth()) {
                     body.innerHTML = data.messages.map(m => {
                         const isAdmin = m.sender_type === 'admin';
                         return `<div class="flex ${isAdmin ? 'justify-end' : 'justify-start'} animate-fade-in">
-                            <div class="max-w-[75%] ${isAdmin ? 'bg-blue-600 text-white rounded-2xl rounded-tr-none shadow-xl shadow-blue-600/10' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm'} p-4">
-                                <p class="text-xs font-bold leading-relaxed">${escapeHtml(m.message)}</p>
-                                <span class="text-[7px] font-black block mt-2.5 text-right ${isAdmin ? 'text-blue-200' : 'text-slate-300'} uppercase tracking-widest">${m.time}</span>
+                            <div class="max-w-[75%] ${isAdmin ? 'bg-red-700 text-white rounded-2xl rounded-tr-none shadow-xl shadow-red-700/10' : 'bg-white text-slate-700 rounded-2xl rounded-tl-none border border-slate-100 shadow-sm'} p-4">
+                                <p class="text-xs font-bold leading-relaxed">${linkify(escapeHtml(m.message))}</p>
+                                <span class="text-[7px] font-black block mt-2.5 text-right ${isAdmin ? 'text-red-200' : 'text-slate-300'} uppercase tracking-widest">${m.time}</span>
                             </div>
                         </div>`;
                     }).join('');
                     if (data.messages.length > lastAdminMsgCount) body.scrollTop = body.scrollHeight;
                     lastAdminMsgCount = data.messages.length;
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) {}
+        }
+
+        function linkify(text) {
+            const urlPattern = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+            return text.replace(urlPattern, '<a href="$1" target="_blank" class="underline hover:opacity-80 transition-opacity">$1</a>');
         }
 
         document.getElementById('admin_chat_form').addEventListener('submit', async (e) => {
@@ -515,35 +506,46 @@ if (!check_auth()) {
         });
 
         function escapeHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
-
         function startAdminChatPolling() { loadChatUsers(); fetchAdminMessages(); adminChatPollInterval = setInterval(() => { loadChatUsers(); fetchAdminMessages(); }, 7000); }
         function stopAdminChatPolling() { clearInterval(adminChatPollInterval); }
+
+        async function handleLogout() {
+            const result = await Swal.fire({
+                title: 'ยืนยันการออกจากระบบ?',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#0f172a',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'ตกลง',
+                cancelButtonText: 'ยกเลิก'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    const res = await fetch('process_admin.php?action=logout');
+                    const data = await res.json();
+                    if (data.success) {
+                        window.location.href = 'index.php?login=1';
+                    }
+                } catch (e) {
+                    window.location.href = 'index.php?login=1';
+                }
+            }
+        }
 
         function exportData(type) {
             const form = document.getElementById('hiddenExportForm');
             if (!form) return;
-
             form.action = type === 'pdf' ? 'export_report.php' : 'export_report.php?format=excel';
-            
             document.getElementById('exp_dept').value = document.getElementById('filter_dept').value;
             document.getElementById('exp_group').value = document.getElementById('filter_group').value;
             document.getElementById('exp_stats').value = JSON.stringify(currentStats);
-            
             if (type === 'pdf') {
                 const canvas = document.getElementById('regChart');
                 if (canvas) {
-                    try {
-                        // ดึงข้อมูลรูปภาพจาก Canvas
-                        document.getElementById('exp_chart').value = canvas.toDataURL('image/png', 0.8);
-                    } catch(e) { 
-                        console.error("Chart Capture Error:", e);
-                        document.getElementById('exp_chart').value = ""; 
-                    }
+                    try { document.getElementById('exp_chart').value = canvas.toDataURL('image/png', 0.8); } catch(e) { document.getElementById('exp_chart').value = ""; }
                 }
-            } else {
-                document.getElementById('exp_chart').value = "";
-            }
-            
+            } else { document.getElementById('exp_chart').value = ""; }
             form.submit();
         }
 

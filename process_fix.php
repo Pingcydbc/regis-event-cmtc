@@ -35,18 +35,26 @@ if ($action == 'get_options') {
     $dept_filter = $_GET['department'] ?? '';
     
     $res_dept = $conn->query("SELECT DISTINCT department FROM students_import WHERE department != '' ORDER BY department ASC");
-    while ($r = $res_dept->fetch_assoc()) $depts[] = $r['department'];
+    if ($res_dept) {
+        while ($r = $res_dept->fetch_assoc()) $depts[] = $r['department'];
+    }
 
     if (!empty($dept_filter)) {
         $stmt = $conn->prepare("SELECT DISTINCT group_name FROM students_import WHERE department = ? AND group_name != '' ORDER BY group_name ASC");
-        $stmt->bind_param("s", $dept_filter);
-        $stmt->execute();
-        $res_group = $stmt->get_result();
+        if ($stmt) {
+            $stmt->bind_param("s", $dept_filter);
+            $stmt->execute();
+            $res_group = $stmt->get_result();
+        } else {
+            $res_group = false;
+        }
     } else {
         $res_group = $conn->query("SELECT DISTINCT group_name FROM students_import WHERE group_name != '' ORDER BY group_name ASC");
     }
 
-    while ($r = $res_group->fetch_assoc()) $groups[] = $r['group_name'];
+    if ($res_group) {
+        while ($r = $res_group->fetch_assoc()) $groups[] = $r['group_name'];
+    }
 
     send_json_response(true, "Options retrieved", ["departments" => $depts, "groups" => $groups]);
 }

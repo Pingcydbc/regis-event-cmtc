@@ -1,5 +1,11 @@
 RewriteEngine On
 
+# ป้องกันการเข้าถึงไฟล์ .env
+<Files .env>
+    Order allow,deny
+    Deny from all
+</Files>
+
 # 1. ปลายทาง /dashboard ให้ไปที่ dashboard.php
 RewriteRule ^dashboard$ dashboard.php [L]
 
