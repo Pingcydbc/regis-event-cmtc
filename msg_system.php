@@ -4,11 +4,13 @@ ini_set('display_errors', 0);
 require_once 'config.php';
 
 try {
-    if (session_status() === PHP_SESSION_NONE) { session_start(); }
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
 
     // Generate/Retrieve User ID for persistent chat
     if (!isset($_SESSION['chat_user_id'])) {
-        $_SESSION['chat_user_id'] = 'user_' . substr(md5(uniqid((string)mt_rand(), true)), 0, 8);
+        $_SESSION['chat_user_id'] = 'user_' . substr(md5(uniqid((string) mt_rand(), true)), 0, 8);
     }
 
     $user_id = $_SESSION['chat_user_id'];
@@ -39,7 +41,7 @@ try {
         $msg = trim($_POST['message'] ?? '');
         // Sanitize input
         $msg = htmlspecialchars($msg, ENT_QUOTES, 'UTF-8');
-        
+
         $is_from_dashboard = isset($_POST['target_user']);
         $type = ($is_from_dashboard && isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) ? 'admin' : 'user';
         $target_user = $_POST['target_user'] ?? $user_id;
@@ -51,8 +53,10 @@ try {
         $stmt = $conn->prepare("INSERT INTO chat_messages (sender_id, sender_type, message) VALUES (?, ?, ?)");
         if ($stmt) {
             $stmt->bind_param("sss", $target_user, $type, $msg);
-            if ($stmt->execute()) send_json_response(true, "Sent");
-            else send_json_response(false, "Error: " . $conn->error);
+            if ($stmt->execute())
+                send_json_response(true, "Sent");
+            else
+                send_json_response(false, "Error: " . $conn->error);
         } else {
             send_json_response(false, "DB Prepare Error");
         }
@@ -61,7 +65,7 @@ try {
     // 2. Get Messages for a specific user
     if ($action == 'get_messages') {
         $target = $_GET['target_user'] ?? $user_id;
-        
+
         if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             $target = $user_id;
         }
@@ -75,10 +79,10 @@ try {
             while ($row = $result->fetch_assoc()) {
                 $row['time'] = date('H:i', strtotime($row['created_at']));
                 // Ensure message is safe (even if sanitized on input, double layer is good)
-                $row['message'] = $row['message']; 
+                $row['message'] = $row['message'];
                 $messages[] = $row;
             }
-            
+
             if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
                 $update = $conn->prepare("UPDATE chat_messages SET is_read = 1 WHERE sender_id = ? AND sender_type = 'user'");
                 if ($update) {
@@ -96,7 +100,7 @@ try {
     // 3. Clear Chat (Delete messages)
     if ($action == 'clear_chat') {
         $target = $_GET['target_user'] ?? $user_id;
-        
+
         if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
             $target = $user_id;
         }
@@ -104,8 +108,10 @@ try {
         $stmt = $conn->prepare("DELETE FROM chat_messages WHERE sender_id = ?");
         if ($stmt) {
             $stmt->bind_param("s", $target);
-            if ($stmt->execute()) send_json_response(true, "Chat cleared");
-            else send_json_response(false, "Error deleting chat");
+            if ($stmt->execute())
+                send_json_response(true, "Chat cleared");
+            else
+                send_json_response(false, "Error deleting chat");
         } else {
             send_json_response(false, "DB Prepare Error");
         }
@@ -113,7 +119,8 @@ try {
 
     // 4. Get list of users who have chatted (Admin only)
     if ($action == 'get_chat_users') {
-        if (!check_auth()) send_json_response(false, "Unauthorized");
+        if (!check_auth())
+            send_json_response(false, "Unauthorized");
 
         $sql = "SELECT sender_id, MAX(created_at) as last_msg_time, 
                 SUM(CASE WHEN is_read = 0 AND sender_type = 'user' THEN 1 ELSE 0 END) as unread_count,
@@ -121,7 +128,7 @@ try {
                 FROM chat_messages m1 
                 GROUP BY sender_id 
                 ORDER BY last_msg_time DESC";
-        
+
         $result = $conn->query($sql);
         if ($result) {
             $users = [];

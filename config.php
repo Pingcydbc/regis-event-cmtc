@@ -10,10 +10,10 @@ define('SECURE_ACCESS', true);
 // 1. Database Credentials (Hardcoded Fallback for Stability)
 // หมายเหตุ: ในระบบจริงเราใช้ .env แต่ถ้า Server มีข้อจำกัดเราจะใช้ค่าเหล่านี้
 $db_config = [
-    'DB_HOST' => 'sql311.infinityfree.com',
-    'DB_USER' => 'if0_41990714',
-    'DB_PASS' => 'HduJK1lBcv',
-    'DB_NAME' => 'if0_41990714_school_register'
+    'DB_HOST' => 'localhost',
+    'DB_USER' => 'root',
+    'DB_PASS' => '',
+    'DB_NAME' => 'school_register'
 ];
 
 // ลองโหลดจาก .env ถ้าทำได้ (แบบปลอดภัยที่สุด)
