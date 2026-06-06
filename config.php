@@ -6,15 +6,29 @@
 
 // ป้องกันการเข้าถึงไฟล์ตรงๆ
 define('SECURE_ACCESS', true);
-
+//mysql://avnadmin:AVNS_SZO940c_RwZ4tG4EUlD@regis-event-database-pingchayodom2323-ef66.g.aivencloud.com:13028/defaultdb?ssl-mode=REQUIRED
 // 1. Database Credentials (Hardcoded Fallback for Stability)
 // หมายเหตุ: ในระบบจริงเราใช้ .env แต่ถ้า Server มีข้อจำกัดเราจะใช้ค่าเหล่านี้
 $db_config = [
-    'DB_HOST' => 'localhost',
-    'DB_USER' => 'root',
-    'DB_PASS' => '',
-    'DB_NAME' => 'school_register'
+    'DB_HOST' => 'regis-event-database-pingchayodom2323-ef66.g.aivencloud.com',
+    'DB_USER' => 'avnadmin',
+    'DB_PASS' => 'AVNS_SZO940c_RwZ4tG4EUID', // รหัสผ่านใหม่ที่แกะมาจาก Service URI ของคุณ
+    'DB_NAME' => 'defaultdb',               // แนะนำให้ใช้ defaultdb ไปก่อนตามที่ Aiven สร้างให้
+    'DB_PORT' => '13028'                     // พอร์ตจากหน้าจอของคุณ
 ];
+
+// เพิ่มตัวเลือก SSL ตรงนี้
+$link = mysqli_init();
+mysqli_ssl_set($link, NULL, NULL, NULL, NULL, NULL); // เปิด SSL
+
+$success = mysqli_real_connect(
+   $link, 
+   $db_config['DB_HOST'], 
+   $db_config['DB_USER'], 
+   $db_config['DB_PASS'], 
+   $db_config['DB_NAME'], 
+   $db_config['DB_PORT']
+);
 
 // ลองโหลดจาก .env ถ้าทำได้ (แบบปลอดภัยที่สุด)
 $env_path = __DIR__ . '/.env';
