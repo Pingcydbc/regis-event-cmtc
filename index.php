@@ -331,31 +331,26 @@ $show_login = isset($_GET['login']) || !empty($login_error);
         }
 
         async function endChat() {
-            const result = await Swal.fire({
-                title: 'จบการสนทนา?',
-                text: "ข้อมูลการแชททั้งหมดจะถูกลบออกจากระบบ",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc2626',
-                cancelButtonColor: '#64748b',
-                confirmButtonText: 'ยืนยัน จบการสนทนา',
-                cancelButtonText: 'ยกเลิก',
-                customClass: { popup: 'rounded-3xl' }
-            });
-
-            if (result.isConfirmed) {
+            toggleChat(); // พับหน้าต่างลงทันที
+            try {
+                const res = await fetch('msg_system.php?action=clear_chat');
+                const text = await res.text();
+                
+                // ตรวจสอบว่าเป็น JSON หรือไม่ (ป้องกันกรณีติดระบบป้องกันของ Hosting)
                 try {
-                    const res = await fetch('msg_system.php?action=clear_chat');
-                    const data = await res.json();
+                    const data = JSON.parse(text);
                     if (data.success) {
                         lastMessageCount = 0;
                         fetchMessages();
-                        toggleChat();
-                        Swal.fire({ icon: 'success', title: 'จบการสนทนาแล้ว', timer: 1500, showConfirmButton: false, customClass: { popup: 'rounded-2xl' } });
                     }
                 } catch (e) {
-                    console.error("End Chat Error:", e);
+                    // หากไม่ใช่ JSON (เช่น เป็น HTML จาก Hosting) ให้ทำการรีเฟรชข้อความเฉยๆ
+                    console.warn("Non-JSON response received:", text.substring(0, 100));
+                    lastMessageCount = 0;
+                    fetchMessages();
                 }
+            } catch (e) {
+                console.error("End Chat Error:", e);
             }
         }
 
