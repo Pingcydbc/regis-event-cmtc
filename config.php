@@ -1,73 +1,61 @@
 <?php
 /**
  * Configuration File - SAFE MODE
- * Simplified for shared hosting compatibility
+ * Optimized for Aiven MySQL and Cloud Deployment
  */
 
 // ป้องกันการเข้าถึงไฟล์ตรงๆ
 define('SECURE_ACCESS', true);
-//mysql://avnadmin:AVNS_SZO940c_RwZ4tG4EUlD@regis-event-database-pingchayodom2323-ef66.g.aivencloud.com:13028/defaultdb?ssl-mode=REQUIRED
-// 1. Database Credentials (Hardcoded Fallback for Stability)
-// หมายเหตุ: ในระบบจริงเราใช้ .env แต่ถ้า Server มีข้อจำกัดเราจะใช้ค่าเหล่านี้
+
+// 1. Database Credentials (ดึงจาก Environment Variables บน Render หรือ Aiven)
 $db_config = [
-    'DB_HOST' => 'regis-event-database-pingchayodom2323-ef66.g.aivencloud.com',
-    'DB_USER' => 'avnadmin',
-    'DB_PASS' => 'AVNS_SZO940c_RwZ4tG4EUID', // รหัสผ่านใหม่ที่แกะมาจาก Service URI ของคุณ
-    'DB_NAME' => 'defaultdb',               // แนะนำให้ใช้ defaultdb ไปก่อนตามที่ Aiven สร้างให้
-    'DB_PORT' => '13028'                     // พอร์ตจากหน้าจอของคุณ
+    'DB_HOST' => getenv('DB_HOST') ?: 'regis-event-database-pingchayodom2323-ef66.g.aivencloud.com',
+    'DB_USER' => getenv('DB_USER') ?: 'avnadmin',
+    'DB_PASS' => getenv('DB_PASS') ?: 'AVNS_SZO940c_RwZ4tG4EUlD',
+    'DB_NAME' => getenv('DB_NAME') ?: 'defaultdb',
+    'DB_PORT' => getenv('DB_PORT') ?: '13028'
 ];
-
-// เพิ่มตัวเลือก SSL ตรงนี้
-$link = mysqli_init();
-mysqli_ssl_set($link, NULL, NULL, NULL, NULL, NULL); // เปิด SSL
-
-$success = mysqli_real_connect(
-   $link, 
-   $db_config['DB_HOST'], 
-   $db_config['DB_USER'], 
-   $db_config['DB_PASS'], 
-   $db_config['DB_NAME'], 
-   $db_config['DB_PORT']
-);
-
-// ลองโหลดจาก .env ถ้าทำได้ (แบบปลอดภัยที่สุด)
-$env_path = __DIR__ . '/.env';
-if (file_exists($env_path) && is_readable($env_path)) {
-    $lines = file($env_path, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
-    if ($lines !== false) {
-        foreach ($lines as $line) {
-            $line = trim($line);
-            if (empty($line) || $line[0] === '#') continue;
-            $pos = strpos($line, '=');
-            if ($pos !== false) {
-                $name = trim(substr($line, 0, $pos));
-                $value = trim(substr($line, $pos + 1));
-                if (!empty($name)) $db_config[$name] = $value;
-            }
-        }
-    }
-}
 
 define('DB_HOST', $db_config['DB_HOST']);
 define('DB_USER', $db_config['DB_USER']);
 define('DB_PASS', $db_config['DB_PASS']);
 define('DB_NAME', $db_config['DB_NAME']);
+define('DB_PORT', (int)$db_config['DB_PORT']);
 
 // 2. Global Settings
 date_default_timezone_set("Asia/Bangkok");
 error_reporting(0); 
 ini_set('display_errors', 0);
 
-// 3. Database Connection Helper
+// 3. Database Connection Helper (รองรับ SSL และ Port สำหรับ Aiven)
 function get_db_connection() {
     static $conn = null;
     if ($conn === null) {
         try {
-            $conn = @new mysqli(DB_HOST, DB_USER, DB_PASS, DB_NAME);
-            if ($conn->connect_error) return null;
+            $conn = mysqli_init();
+            // Aiven MySQL มักต้องการการเชื่อมต่อแบบ SSL
+            mysqli_ssl_set($conn, NULL, NULL, NULL, NULL, NULL);
+            
+            $success = @mysqli_real_connect(
+                $conn, 
+                DB_HOST, 
+                DB_USER, 
+                DB_PASS, 
+                DB_NAME, 
+                DB_PORT,
+                NULL,
+                MYSQLI_CLIENT_SSL
+            );
+
+            if (!$success) {
+                error_log("MySQL Connection Error: " . mysqli_connect_error());
+                return null;
+            }
+
             $conn->set_charset("utf8mb4");
             $conn->query("SET time_zone = '+07:00'");
         } catch (Exception $e) {
+            error_log("Database Exception: " . $e->getMessage());
             return null;
         }
     }
