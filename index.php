@@ -441,13 +441,31 @@ $show_login = isset($_GET['login']) || !empty($login_error);
         }
 
         async function endChat() {
-            toggleChat();
-            lastMessageCount = 0;
-            try {
-                const res = await fetch('msg_system.php?action=clear_chat');
-                const data = await handleResponse(res);
-                if (data && data.success) fetchMessages();
-            } catch (e) { }
+            const result = await Swal.fire({
+                title: 'จบการสนทนา?',
+                text: "ข้อมูลการแชททั้งหมดจะถูกลบออกจากระบบ",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: 'ยืนยัน จบการสนทนา',
+                cancelButtonText: 'ยกเลิก',
+                customClass: {
+                    popup: 'rounded-[2rem]',
+                    title: 'text-lg font-black',
+                    htmlContainer: 'text-xs font-bold text-slate-400'
+                }
+            });
+
+            if (result.isConfirmed) {
+                toggleChat();
+                lastMessageCount = 0;
+                try {
+                    const res = await fetch('msg_system.php?action=clear_chat');
+                    const data = await handleResponse(res);
+                    if (data && data.success) fetchMessages();
+                } catch (e) { }
+            }
         }
 
         async function fetchMessages() {
