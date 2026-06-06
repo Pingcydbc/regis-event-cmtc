@@ -12,7 +12,7 @@ $db_config = [
     'DB_HOST' => getenv('DB_HOST') ?: 'regis-event-database-pingchayodom2323-ef66.g.aivencloud.com',
     'DB_USER' => getenv('DB_USER') ?: 'avnadmin',
     'DB_PASS' => getenv('DB_PASS') ?: 'AVNS_SZO940c_RwZ4tG4EUlD',
-    'DB_NAME' => getenv('DB_NAME') ?: 'school_register',
+    'DB_NAME' => getenv('DB_NAME') ?: 'defaultdb',
     'DB_PORT' => getenv('DB_PORT') ?: '13028'
 ];
 
